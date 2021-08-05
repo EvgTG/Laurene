@@ -109,6 +109,7 @@ func NewService(cfg *initConfig /*, db *model.Model*/) *mainpac.Service {
 			ErrorList:     cfg.ErrorList,
 			Uptime:        time.Now(),
 			CallbackQuery: make(map[int64]string),
+			AlbumsManager: util.NewAlbumsManager(),
 		},
 		DB:   nil,
 		Loc:  cfg.Loc,

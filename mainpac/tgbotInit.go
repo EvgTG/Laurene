@@ -7,7 +7,7 @@ func (s *Service) InitTBot() {
 
 	s.TG.Bot.Handle("/start", s.TgStartCMD)
 	s.TG.Bot.Handle("/help", s.TgStartCMD)
-	s.TG.Bot.Handle(tb.OnPhoto, s.TgAlbumToPic)
+	s.TG.Bot.Handle(tb.OnPhoto, s.TgPic)
 
 	// Админские команды
 
@@ -22,6 +22,10 @@ func (s *Service) InitTBot() {
 	rm := &tb.ReplyMarkup{}
 	im := &tb.ReplyMarkup{ResizeReplyKeyboard: true}
 	s.TG.Buttons = make(map[string]*tb.Btn)
+
+	s.TG.addBtn(rm.Data("Объединить вниз", "album_to_pic"), "album_to_pic", s.TgAlbumToPic)
+
+	// Админские кнопки
 
 	s.TG.addBtn(rm.Data("Test", "test"), "test", s.TgTestBtn)
 	s.TG.addBtn(rm.Data("🗑Удалить", "delete"), "delete", s.TgDeleteBtn)

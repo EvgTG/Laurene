@@ -16,7 +16,12 @@ Func -       логика работы
 */
 
 func (s *Service) TgStartCMD(m *tb.Message) {
-	s.TG.Bot.Send(m.Sender, "Приветствую, бот имеет следующие возможности:\n\nСклейка фото, если прислать или переслать альбом.", &tb.ReplyMarkup{ReplyKeyboardRemove: true})
+	text := "" +
+		"Приветствую, бот имеет следующие возможности:" +
+		"\n" +
+		"\n• Склейка фото, если прислать или переслать альбом."
+
+	s.TG.Bot.Send(m.Sender, text, &tb.ReplyMarkup{ReplyKeyboardRemove: true})
 }
 
 // Ниже только админское

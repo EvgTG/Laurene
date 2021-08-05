@@ -2,6 +2,7 @@ package mainpac
 
 import (
 	"Laurene/model"
+	"Laurene/util"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"math/rand"
 	"time"
@@ -24,4 +25,5 @@ type TG struct {
 	Uptime        time.Time
 	Buttons       map[string]*tb.Btn
 	CallbackQuery map[int64]string //контекстный ввод
+	AlbumsManager *util.AlbumsManager
 }
