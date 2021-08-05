@@ -1,12 +1,12 @@
 package main
 
 import (
-	"Loren/go-config"
-	"Loren/go-log"
-	"Loren/mainpac"
-	"Loren/model"
-	"Loren/mongodb"
-	"Loren/util"
+	"Laurene/go-config"
+	"Laurene/go-log"
+	"Laurene/mainpac"
+	"Laurene/model"
+	"Laurene/mongodb"
+	"Laurene/util"
 	"fmt"
 	"go.uber.org/fx"
 	tb "gopkg.in/tucnak/telebot.v2"

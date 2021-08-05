@@ -1,7 +1,7 @@
 package util
 
 import (
-	"Loren/go-log"
+	"Laurene/go-log"
 	"fmt"
 	"github.com/pkg/errors"
 	"math/rand"

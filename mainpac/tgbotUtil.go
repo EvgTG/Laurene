@@ -1,7 +1,7 @@
 package mainpac
 
 import (
-	"Loren/util"
+	"Laurene/util"
 	"fmt"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"time"

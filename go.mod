@@ -1,4 +1,4 @@
-module Loren
+module Laurene
 
 go 1.16
 

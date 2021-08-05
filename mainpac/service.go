@@ -1,7 +1,7 @@
 package mainpac
 
 import (
-	"Loren/model"
+	"Laurene/model"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"math/rand"
 	"time"

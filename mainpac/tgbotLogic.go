@@ -1,7 +1,7 @@
 package mainpac
 
 import (
-	"Loren/go-log"
+	"Laurene/go-log"
 	"fmt"
 	"github.com/pkg/errors"
 	tb "gopkg.in/tucnak/telebot.v2"

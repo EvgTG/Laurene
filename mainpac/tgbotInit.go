@@ -7,6 +7,7 @@ func (s *Service) InitTBot() {
 
 	s.TG.Bot.Handle("/start", s.TgStartCMD)
 	s.TG.Bot.Handle("/help", s.TgStartCMD)
+	s.TG.Bot.Handle(tb.OnPhoto, s.TgAlbumToPic)
 
 	// Админские команды
 
