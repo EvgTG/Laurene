@@ -1,12 +1,12 @@
 [Unit]
-Description=LoreNetBot
+Description=LaureneAssistantBot
 After=multi-user.target
 
 [Service]
 User=root
 Group=root
 WorkingDirectory=/root/app/
-ExecStart=/root/app/loren
+ExecStart=/root/app/lrn
 
 [Install]
 WantedBy=multi-user.target

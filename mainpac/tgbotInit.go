@@ -6,6 +6,7 @@ func (s *Service) InitTBot() {
 	// Команды роуты
 
 	s.TG.Bot.Handle("/start", s.TgStartCMD)
+	s.TG.Bot.Handle("/help", s.TgStartCMD)
 
 	// Админские команды
 

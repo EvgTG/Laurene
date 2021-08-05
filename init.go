@@ -133,7 +133,7 @@ func PingServe(cfg *initConfig) {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/pingLoren", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/pingLaurene", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "pong")
 	})
