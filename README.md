@@ -1,1 +1,1 @@
-# LoreNetBot
+# LaureneAssistantBot
