@@ -9,12 +9,13 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"os"
+	"sort"
 	"time"
 )
 
 func (s *Service) TgPic(m *tb.Message) {
 	if m.AlbumID != "" {
-		if s.TG.AlbumsManager.AddPhoto(m.AlbumID, m.Photo) {
+		if s.TG.AlbumsManager.AddPhotoMes(m.AlbumID, m) {
 			return
 		}
 		time.Sleep(time.Second)
@@ -48,14 +49,17 @@ func (s *Service) TgAlbumToPic(c *tb.Callback) {
 		return
 	}
 
-	photos := s.TG.AlbumsManager.GetAlbum(albumID)
-	if len(photos) == 0 {
+	photosMes := s.TG.AlbumsManager.GetAlbum(albumID)
+	if len(photosMes) == 0 {
 		return
 	}
 
-	pathes := make([]string, 0, len(photos))
-	images := make([]image.Image, 0, len(photos))
-	for _, photo := range photos {
+	sort.Slice(photosMes, func(i, j int) bool { return photosMes[i].ID < photosMes[j].ID })
+
+	pathes := make([]string, 0, len(photosMes))
+	images := make([]image.Image, 0, len(photosMes))
+	for _, mes := range photosMes {
+		photo := mes.Photo
 		path := "files/temp/" + photo.FileID + ".jpg"
 		defer os.Remove(path)
 		pathes = append(pathes, path)

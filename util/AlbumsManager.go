@@ -8,7 +8,7 @@ import (
 
 type AlbumsManager struct {
 	mt         sync.Mutex
-	albums     map[string][]*tb.Photo
+	albums     map[string][]*tb.Message
 	albumsTime []albumTime
 }
 
@@ -20,7 +20,7 @@ type albumTime struct {
 func NewAlbumsManager() *AlbumsManager {
 	a := &AlbumsManager{
 		mt:         sync.Mutex{},
-		albums:     make(map[string][]*tb.Photo, 0),
+		albums:     make(map[string][]*tb.Message, 0),
 		albumsTime: make([]albumTime, 0),
 	}
 
@@ -28,13 +28,13 @@ func NewAlbumsManager() *AlbumsManager {
 	return a
 }
 
-func (a *AlbumsManager) AddPhoto(albumID string, photo *tb.Photo) bool {
+func (a *AlbumsManager) AddPhotoMes(albumID string, photo *tb.Message) bool {
 	a.mt.Lock()
 	defer a.mt.Unlock()
 
 	_, ok := a.albums[albumID]
 	if !ok {
-		a.albums[albumID] = make([]*tb.Photo, 0, 10)
+		a.albums[albumID] = make([]*tb.Message, 0, 10)
 		a.albumsTime = append(a.albumsTime, albumTime{id: albumID, tm: time.Now()})
 	}
 	a.albums[albumID] = append(a.albums[albumID], photo)
@@ -42,11 +42,11 @@ func (a *AlbumsManager) AddPhoto(albumID string, photo *tb.Photo) bool {
 	return ok
 }
 
-func (a *AlbumsManager) GetAlbum(albumID string) []*tb.Photo {
+func (a *AlbumsManager) GetAlbum(albumID string) []*tb.Message {
 	a.mt.Lock()
 	defer a.mt.Unlock()
 
-	photos := make([]*tb.Photo, 0)
+	photos := make([]*tb.Message, 0)
 	_, ok := a.albums[albumID]
 
 	if ok {
