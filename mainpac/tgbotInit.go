@@ -1,6 +1,8 @@
 package mainpac
 
-import tb "gopkg.in/tucnak/telebot.v2"
+import (
+	tb "gopkg.in/tucnak/telebot.v2"
+)
 
 func (s *Service) InitTBot() {
 	// Команды роуты

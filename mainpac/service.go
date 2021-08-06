@@ -1,8 +1,10 @@
 package mainpac
 
 import (
+	"Laurene/go-log"
 	"Laurene/model"
 	"Laurene/util"
+	"fmt"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"math/rand"
 	"time"
@@ -26,4 +28,12 @@ type TG struct {
 	Buttons       map[string]*tb.Btn
 	CallbackQuery map[int64]string //контекстный ввод
 	AlbumsManager *util.AlbumsManager
+}
+
+func (s Service) Start() {
+	log.Info("tgbot init")
+	s.InitTBot()
+	log.Info("tgbot launch...")
+	fmt.Println("tgbot @" + s.TG.Bot.Me.Username)
+	s.TG.Bot.Start()
 }

@@ -51,6 +51,7 @@ func Warnf(format string, args ...interface{}) {
 func Errorf(format string, args ...interface{}) {
 	if logger != nil {
 		logger.Errorf(format, args...)
+		errsNotif.i++
 	}
 }
 
@@ -90,6 +91,7 @@ func Warn(args ...interface{}) {
 func Error(args ...interface{}) {
 	if logger != nil {
 		logger.Error(args...)
+		errsNotif.i++
 	}
 }
 func Fatal(args ...interface{}) {

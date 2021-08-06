@@ -120,11 +120,7 @@ func NewService(cfg *initConfig /*, db *model.Model*/) *mainpac.Service {
 }
 
 func Start(s *mainpac.Service) {
-	log.Info("tgbot init")
-	s.InitTBot()
-	log.Info("tgbot launch...")
-	fmt.Println("tgbot @" + s.TG.Bot.Me.Username)
-	s.TG.Bot.Start()
+	s.Start()
 }
 
 func PingServe(cfg *initConfig) {
