@@ -57,11 +57,11 @@ func (s *Service) TgAdm(m *tb.Message) {
 	}
 
 	text := fmt.Sprintf("" +
-		"<b>Пользователькие команды:</b>\n" +
-		"/start - приветствие\n" +
-		"\n<b>Админские команды:</b>\n" +
-		"/status - статус работы\n" +
-		"/logs - действия над логами",
+		"<b>Пользователькие команды:</b>" +
+		"\n/start - приветствие" +
+		"\n\n<b>Админские команды:</b>" +
+		"\n/status - статус работы" +
+		"\n/logs - действия над логами",
 	)
 
 	s.TG.Bot.Send(m.Sender, text, tb.ModeHTML)
@@ -125,9 +125,7 @@ func (s *Service) TgClearLogsBtn(c *tb.Callback) {
 		return
 	}
 
-	file, _ := os.OpenFile("files/logrus.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	file.Truncate(0)
-	file.Close()
+	os.Truncate("files/logrus.log", 0)
 	log.Info("Очищено")
 
 	s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Очищено", ShowAlert: true})
