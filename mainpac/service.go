@@ -35,5 +35,21 @@ func (s Service) Start() {
 	s.InitTBot()
 	log.Info("tgbot launch...")
 	fmt.Println("tgbot @" + s.TG.Bot.Me.Username)
+	go s.GoCheckErrs()
 	s.TG.Bot.Start()
+}
+
+func (s Service) GoCheckErrs() {
+	time.Sleep(time.Second * 30)
+	nErr := log.GetErrN()
+	if nErr > 0 {
+		s.TG.sendToSlice(s.TG.ErrorList, fmt.Sprintf("Новых ошибок: %v.\n Заляните в логи.", nErr))
+	}
+
+	for range time.Tick(time.Minute * 5) {
+		nErr = log.GetErrN()
+		if nErr > 0 {
+			s.TG.sendToSlice(s.TG.ErrorList, fmt.Sprintf("Новых ошибок: %v.\n Заляните в логи.", nErr))
+		}
+	}
 }
