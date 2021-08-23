@@ -25,7 +25,9 @@ func (s *Service) InitTBot() {
 	im := &tb.ReplyMarkup{ResizeReplyKeyboard: true}
 	s.TG.Buttons = make(map[string]*tb.Btn)
 
-	s.TG.addBtn(rm.Data("Объединить вниз", "album_to_pic"), "album_to_pic", s.TgAlbumToPic)
+	s.TG.addBtn(rm.Data("1️⃣ вниз", "album_to_pic_down", "down"), "album_to_pic_down", s.TgAlbumToPic)
+	s.TG.addBtn(rm.Data("1️⃣ вправо", "album_to_pic_right", "right"), "album_to_pic_right", s.TgAlbumToPic)
+	s.TG.addBtn(rm.Data("1️⃣ сеткой", "album_to_pic_mesh", "mesh"), "album_to_pic_mesh", s.TgAlbumToPic)
 
 	// Админские кнопки
 
