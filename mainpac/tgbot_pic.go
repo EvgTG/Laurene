@@ -263,7 +263,7 @@ func (s *Service) TgFilePicToPic(c *tb.Callback) {
 		return
 	}
 
+	s.TG.Bot.Send(c.Sender, &tb.Photo{File: tb.FromDisk(outPath), Caption: c.Message.Caption})
 	s.TG.Bot.EditReplyMarkup(c.Message, nil)
-	s.TG.Bot.Send(c.Sender, &tb.Photo{File: tb.FromDisk(outPath), Caption: c.Message.Caption}, &tb.SendOptions{ReplyTo: c.Message})
 	s.TG.Bot.Respond(c)
 }

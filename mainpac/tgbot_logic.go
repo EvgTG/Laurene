@@ -87,7 +87,9 @@ func (s *Service) TgStatusUpdate(c *tb.Callback) {
 }
 
 func (s *Service) TgStatusFunc() (string, *tb.ReplyMarkup) {
-	text := fmt.Sprintf("Uptime: %s", s.TG.uptimeString(s.TG.Uptime))
+	text := fmt.Sprintf("Uptime: %s\nAlbums manager length: %v",
+		s.TG.uptimeString(s.TG.Uptime), s.TG.AlbumsManager.Len(),
+	)
 
 	rm := &tb.ReplyMarkup{}
 	rm.Inline([]tb.Btn{*s.TG.Buttons["status_update"]})

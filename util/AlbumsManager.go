@@ -30,6 +30,10 @@ func NewAlbumsManager() *AlbumsManager {
 	return a
 }
 
+func (a *AlbumsManager) Len() int {
+	return len(a.albums)
+}
+
 func (a *AlbumsManager) AddPhotoMes(albumID string, photo *tb.Message) bool {
 	a.mt.Lock()
 	defer a.mt.Unlock()
