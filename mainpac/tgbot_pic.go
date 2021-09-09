@@ -3,6 +3,7 @@ package mainpac
 import (
 	"Laurene/go-log"
 	"Laurene/util"
+	"fmt"
 	"github.com/pkg/errors"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"image"
@@ -37,9 +38,7 @@ func (s *Service) TgPic(m *tb.Message) {
 }
 
 func (s *Service) TgAlbumToPic(c *tb.Callback) {
-	defer s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: ""})
-
-	if c.Message.ReplyTo == nil {
+	if c.Message == nil || c.Message.ReplyTo == nil {
 		return
 	}
 
@@ -48,8 +47,15 @@ func (s *Service) TgAlbumToPic(c *tb.Callback) {
 		return
 	}
 
+	okLock := s.TG.AlbumsManager.LockAlbum(albumID)
+	if !okLock {
+		s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Подождите пока другой запрос выполнится.", ShowAlert: true})
+		return
+	}
+	defer s.TG.AlbumsManager.UnLockAlbum(albumID)
 	photosMes := s.TG.AlbumsManager.GetAlbum(albumID)
 	if len(photosMes) == 0 {
+		s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Фото не найдены, попробуйте переслать их в этого в бота.", ShowAlert: true})
 		return
 	}
 
@@ -67,7 +73,7 @@ func (s *Service) TgAlbumToPic(c *tb.Callback) {
 		err := s.TG.Bot.Download(photo.MediaFile(), path)
 		if err != nil {
 			log.Warn(errors.Wrap(err, "TgAlbumToPic Bot.Download"))
-			s.TG.Bot.Send(c.Sender, "Ошибка скачивания, попробуйте позже.")
+			s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка скачивания, попробуйте позже.", ShowAlert: true})
 			return
 		}
 	}
@@ -76,7 +82,7 @@ func (s *Service) TgAlbumToPic(c *tb.Callback) {
 		imgFile, err := os.Open(path)
 		if err != nil {
 			log.Warn(errors.Wrap(err, "TgAlbumToPic os.Open"))
-			s.TG.Bot.Send(c.Sender, "Ошибка файлов, попробуйте позже.")
+			s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка файлов, попробуйте позже.", ShowAlert: true})
 			return
 		}
 		defer imgFile.Close()
@@ -84,7 +90,7 @@ func (s *Service) TgAlbumToPic(c *tb.Callback) {
 		img, _, err := image.Decode(imgFile)
 		if err != nil {
 			log.Warn(errors.Wrap(err, "TgAlbumToPic image.Decode"))
-			s.TG.Bot.Send(c.Sender, "Ошибка файлов, попробуйте позже.")
+			s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка файлов, попробуйте позже.", ShowAlert: true})
 			return
 		}
 
@@ -197,9 +203,8 @@ func (s *Service) TgAlbumToPic(c *tb.Callback) {
 
 			draw.Draw(rgba, r, img, image.Point{0, 0}, draw.Src)
 		}
-
 	default:
-		s.TG.Bot.Send(c.Sender, "Ошибка")
+		s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка, напишите создателю."})
 		return
 	}
 
@@ -208,7 +213,7 @@ func (s *Service) TgAlbumToPic(c *tb.Callback) {
 	out, err := os.Create(outPath)
 	if err != nil {
 		log.Warn(errors.Wrap(err, "TgAlbumToPic os.Create(outPath)"))
-		s.TG.Bot.Send(c.Sender, "Ошибка файлов, попробуйте позже.")
+		s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка файлов, попробуйте позже.", ShowAlert: true})
 		return
 	}
 	defer out.Close()
@@ -218,13 +223,47 @@ func (s *Service) TgAlbumToPic(c *tb.Callback) {
 	err = jpeg.Encode(out, rgba, &opt)
 	if err != nil {
 		log.Warn(errors.Wrap(err, "TgAlbumToPic jpeg.Encode"))
-		s.TG.Bot.Send(c.Sender, "Ошибка файлов, попробуйте позже.")
+		s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка файлов, попробуйте позже.", ShowAlert: true})
 		return
 	}
 
-	_, err = s.TG.Bot.Send(c.Sender, &tb.Document{File: tb.FromDisk(outPath), FileName: "pic.jpg"})
+	rm := &tb.ReplyMarkup{}
+	rm.Inline([]tb.Btn{*s.TG.Buttons["picfile_to_pic"]})
+	_, err = s.TG.Bot.Send(c.Sender, &tb.Document{File: tb.FromDisk(outPath), FileName: "pic.jpg", Caption: photosMes[0].Caption}, rm)
 	if err != nil {
-		s.TG.Bot.Send(c.Sender, "Ошибка отправки.")
+		s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка отправки.", ShowAlert: true})
 		return
 	}
+	s.TG.Bot.Respond(c)
+	_, err = s.TG.Bot.EditReplyMarkup(c.Message, &tb.ReplyMarkup{InlineKeyboard: delBtn(c.Message.ReplyMarkup.InlineKeyboard, c.Data)})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}
+
+func (s *Service) TgFilePicToPic(c *tb.Callback) {
+	if !s.TG.isAdmin(c.Sender, c.Message.Chat.ID) {
+		return
+	}
+
+	if c.Message == nil {
+		s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка"})
+		return
+	}
+	if c.Message.Document == nil {
+		s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка"})
+		return
+	}
+
+	outPath := "files/temp/" + util.CreateKey(12) + ".jpg"
+	defer os.Remove(outPath)
+	err := s.TG.Bot.Download(c.Message.Document.MediaFile(), outPath)
+	if err != nil {
+		s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Ошибка"})
+		return
+	}
+
+	s.TG.Bot.EditReplyMarkup(c.Message, nil)
+	s.TG.Bot.Send(c.Sender, &tb.Photo{File: tb.FromDisk(outPath), Caption: c.Message.Caption}, &tb.SendOptions{ReplyTo: c.Message})
+	s.TG.Bot.Respond(c)
 }

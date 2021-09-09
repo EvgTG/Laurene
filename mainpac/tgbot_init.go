@@ -28,6 +28,7 @@ func (s *Service) InitTBot() {
 	s.TG.addBtn(rm.Data("1️⃣ вниз", "album_to_pic_down", "down"), "album_to_pic_down", s.TgAlbumToPic)
 	s.TG.addBtn(rm.Data("1️⃣ вправо", "album_to_pic_right", "right"), "album_to_pic_right", s.TgAlbumToPic)
 	s.TG.addBtn(rm.Data("1️⃣ сеткой", "album_to_pic_mesh", "mesh"), "album_to_pic_mesh", s.TgAlbumToPic)
+	s.TG.addBtn(rm.Data("🖼 Отправить картинкой", "picfile_to_pic"), "picfile_to_pic", s.TgFilePicToPic)
 
 	// Админские кнопки
 

@@ -7,9 +7,10 @@ import (
 )
 
 type AlbumsManager struct {
-	mt         sync.Mutex
-	albums     map[string][]*tb.Message
-	albumsTime []albumTime
+	mt           sync.Mutex
+	albums       map[string][]*tb.Message
+	albumsLocker []string
+	albumsTime   []albumTime
 }
 
 type albumTime struct {
@@ -19,9 +20,10 @@ type albumTime struct {
 
 func NewAlbumsManager() *AlbumsManager {
 	a := &AlbumsManager{
-		mt:         sync.Mutex{},
-		albums:     make(map[string][]*tb.Message, 0),
-		albumsTime: make([]albumTime, 0),
+		mt:           sync.Mutex{},
+		albums:       make(map[string][]*tb.Message, 0),
+		albumsLocker: make([]string, 0),
+		albumsTime:   make([]albumTime, 0),
 	}
 
 	go a.delAlbumsHour()
@@ -80,5 +82,32 @@ func (a *AlbumsManager) delAlbumsHour() {
 				}
 			}
 		}()
+	}
+}
+
+func (a *AlbumsManager) LockAlbum(albumID string) bool { // true - альбом заблокирован и в использовании
+	a.mt.Lock()
+	defer a.mt.Unlock()
+
+	for _, s := range a.albumsLocker {
+		if s == albumID {
+			return false
+		}
+	}
+
+	a.albumsLocker = append(a.albumsLocker, albumID)
+
+	return true
+}
+
+func (a *AlbumsManager) UnLockAlbum(albumID string) {
+	a.mt.Lock()
+	defer a.mt.Unlock()
+
+	for i, s := range a.albumsLocker {
+		if s == albumID {
+			a.albumsLocker = append(a.albumsLocker[:i], a.albumsLocker[i+1:]...)
+			return
+		}
 	}
 }
