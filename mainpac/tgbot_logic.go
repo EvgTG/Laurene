@@ -4,7 +4,7 @@ import (
 	"Laurene/go-log"
 	"fmt"
 	"github.com/pkg/errors"
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/tucnak/telebot.v3"
 	"os"
 )
 
@@ -15,19 +15,20 @@ Func -       логика работы
 Но они обязательны только все вместе
 */
 
-func (s *Service) TgStartCMD(m *tb.Message) {
+func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 	text := "" +
 		"Приветствую, бот имеет следующие возможности:" +
 		"\n" +
 		"\n• Склейка фото, если прислать или переслать альбом."
 
-	s.TG.Bot.Send(m.Sender, text, &tb.ReplyMarkup{ReplyKeyboardRemove: true})
+	s.TG.Bot.Send(x.Sender(), text, &tb.ReplyMarkup{RemoveKeyboard: true})
+	return
 }
 
 // Ниже только админское
 
-func (s *Service) TgTest(m *tb.Message) {
-	if !s.TG.isAdmin(m.Sender, m.Chat.ID) {
+func (s *Service) TgTest(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
 		return
 	}
 
@@ -35,11 +36,12 @@ func (s *Service) TgTest(m *tb.Message) {
 	btn := *s.TG.Buttons["test"]
 	rm.Inline([]tb.Btn{btn})
 
-	s.TG.Bot.Send(m.Sender, "Test", rm, tb.ModeHTML, tb.NoPreview)
+	s.TG.Bot.Send(x.Sender(), "Test", rm, tb.ModeHTML, tb.NoPreview)
+	return
 }
 
-func (s *Service) TgTestBtn(c *tb.Callback) {
-	if !s.TG.isAdmin(c.Sender, c.Message.Chat.ID) {
+func (s *Service) TgTestBtn(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
 		return
 	}
 
@@ -47,12 +49,13 @@ func (s *Service) TgTestBtn(c *tb.Callback) {
 	btn := *s.TG.Buttons["test"]
 	rm.Inline([]tb.Btn{btn})
 
-	s.TG.Bot.Send(c.Sender, "Test", &tb.SendOptions{ReplyTo: c.Message}, rm, tb.ModeHTML, tb.NoPreview)
-	s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "test"})
+	s.TG.Bot.Send(x.Sender(), "Test", &tb.SendOptions{ReplyTo: x.Message()}, rm, tb.ModeHTML, tb.NoPreview)
+	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "test"})
+	return
 }
 
-func (s *Service) TgAdm(m *tb.Message) {
-	if !s.TG.isAdmin(m.Sender, m.Chat.ID) {
+func (s *Service) TgAdm(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
 		return
 	}
 
@@ -64,26 +67,29 @@ func (s *Service) TgAdm(m *tb.Message) {
 		"\n/logs - действия над логами",
 	)
 
-	s.TG.Bot.Send(m.Sender, text, tb.ModeHTML)
+	s.TG.Bot.Send(x.Sender(), text, tb.ModeHTML)
+	return
 }
 
-func (s *Service) TgStatusCMD(m *tb.Message) {
-	if !s.TG.isAdmin(m.Sender, m.Chat.ID) {
+func (s *Service) TgStatusCMD(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
 		return
 	}
 
 	text, rm := s.TgStatusFunc()
-	s.TG.Bot.Send(m.Sender, text, rm)
+	s.TG.Bot.Send(x.Sender(), text, rm)
+	return
 }
 
-func (s *Service) TgStatusUpdate(c *tb.Callback) {
-	if !s.TG.isAdmin(c.Sender, c.Message.Chat.ID) {
+func (s *Service) TgStatusUpdate(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
 		return
 	}
 
 	text, rm := s.TgStatusFunc()
-	s.TG.Bot.Edit(c.Message, text, rm)
-	s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Обновлено"})
+	s.TG.Bot.Edit(x.Message(), text, rm)
+	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Обновлено"})
+	return
 }
 
 func (s *Service) TgStatusFunc() (string, *tb.ReplyMarkup) {
@@ -97,8 +103,8 @@ func (s *Service) TgStatusFunc() (string, *tb.ReplyMarkup) {
 	return text, rm
 }
 
-func (s *Service) TgLogsCMD(m *tb.Message) {
-	if !s.TG.isAdmin(m.Sender, m.Chat.ID) {
+func (s *Service) TgLogsCMD(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
 		return
 	}
 
@@ -107,74 +113,80 @@ func (s *Service) TgLogsCMD(m *tb.Message) {
 	rm.Inline(
 		[]tb.Btn{*s.TG.Buttons["get_logs"], *s.TG.Buttons["clear_logs"]},
 	)
-	s.TG.Bot.Send(m.Sender, text, rm, tb.ModeHTML)
+	s.TG.Bot.Send(x.Sender(), text, rm, tb.ModeHTML)
+	return
 }
 
-func (s *Service) TgGetLogsBtn(c *tb.Callback) {
-	if !s.TG.isAdmin(c.Sender, c.Message.Chat.ID) {
+func (s *Service) TgGetLogsBtn(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
 		return
 	}
 
-	_, err := s.TG.Bot.Send(c.Sender, &tb.Document{File: tb.FromDisk("files/logrus.log"), FileName: "logrus.log"})
+	_, err := s.TG.Bot.Send(x.Sender(), &tb.Document{File: tb.FromDisk("files/logrus.log"), FileName: "logrus.log"})
 	if err != nil {
-		s.TG.Bot.Send(c.Sender, errors.Wrap(err, "Ошибка отправки файла.").Error())
+		s.TG.Bot.Send(x.Sender(), errors.Wrap(err, "Ошибка отправки файла.").Error())
 	}
-	s.TG.Bot.Respond(c)
+	x.Respond()
+	return
 }
 
-func (s *Service) TgClearLogsBtn(c *tb.Callback) {
-	if !s.TG.isAdmin(c.Sender, c.Message.Chat.ID) {
+func (s *Service) TgClearLogsBtn(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
 		return
 	}
 
 	os.Truncate("files/logrus.log", 0)
 	log.Info("Очищено")
 
-	s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: "Очищено", ShowAlert: true})
+	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Очищено", ShowAlert: true})
+	return
 }
 
-func (s *Service) TgCallbackQuery(m *tb.Message) {
-	if !s.TG.isAdmin(m.Sender, m.Chat.ID) {
+func (s *Service) TgCallbackQuery(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
 		return
 	}
 
-	switch s.TG.CallbackQuery[m.Chat.ID] {
+	switch s.TG.CallbackQuery[x.Chat().ID] {
 	case "": //Нет в CallbackQuery - игнор
 	case "test":
 
 	}
+	return
 }
 
-func (s *Service) TgDeleteBtn(c *tb.Callback) {
-	if !s.TG.isAdmin(c.Sender, c.Message.Chat.ID) {
+func (s *Service) TgDeleteBtn(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
 		return
 	}
-	s.TG.Bot.Respond(c)
-	s.TG.Bot.Delete(c.Message)
+	x.Respond()
+	s.TG.Bot.Delete(x.Message())
+	return
 }
 
-func (s *Service) TgCancelReplyMarkup(m *tb.Message) {
-	if !s.TG.isAdmin(m.Sender, m.Chat.ID) {
+func (s *Service) TgCancelReplyMarkup(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
 		return
 	}
-	delete(s.TG.CallbackQuery, m.Chat.ID)
-	s.TG.Bot.Send(m.Sender, "Отменено.", &tb.ReplyMarkup{ReplyKeyboardRemove: true})
+	delete(s.TG.CallbackQuery, x.Chat().ID)
+	s.TG.Bot.Send(x.Sender(), "Отменено.", &tb.ReplyMarkup{RemoveKeyboard: true})
+	return
 }
 
 /*
 
-func (s *Service) TgBtn(c *tb.Callback) {
-	if !s.TG.isAdmin(c.Sender, c.Message.Chat.ID) {
+func (s *Service) TgBtn(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
 		return
 	}
 
 	//text, rm := s.TgFunc()
-	//s.TG.Bot.Send(c.Sender, text, rm, tb.ModeHTML)
-	//s.TG.Bot.Edit(c.Message, text, rm)
-	s.TG.Bot.Respond(c, &tb.CallbackResponse{CallbackID: c.ID, Text: ""})
+	//s.TG.Bot.Send(x.Sender(), text, rm, tb.ModeHTML)
+	//s.TG.Bot.Edit(x.Message(), text, rm)
+	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: ""})
 }
-func (s *Service) TgCMD(m *tb.Message) {
-	if !s.TG.isAdmin(m.Sender, m.Chat.ID) {
+func (s *Service) TgCMD(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
 		return
 	}
 
@@ -183,7 +195,7 @@ func (s *Service) TgCMD(m *tb.Message) {
 	rm.Inline(
 		[]tb.Btn{*s.TG.Buttons["status_update"]},
 	)
-	s.TG.Bot.Send(m.Sender, text, rm, tb.ModeHTML)
+	s.TG.Bot.Send(x.Sender(), text, rm, tb.ModeHTML)
 }
 
 func (s *Service) TgFunc() (string, *tb.ReplyMarkup) {

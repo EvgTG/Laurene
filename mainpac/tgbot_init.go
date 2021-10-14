@@ -1,7 +1,7 @@
 package mainpac
 
 import (
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/tucnak/telebot.v3"
 )
 
 func (s *Service) InitTBot() {
@@ -22,7 +22,7 @@ func (s *Service) InitTBot() {
 	// Кнопки роуты
 
 	rm := &tb.ReplyMarkup{}
-	im := &tb.ReplyMarkup{ResizeReplyKeyboard: true}
+	im := &tb.ReplyMarkup{ResizeKeyboard: true}
 	s.TG.Buttons = make(map[string]*tb.Btn)
 
 	s.TG.addBtn(rm.Data("1️⃣ вниз", "album_to_pic_down", "down"), "album_to_pic_down", s.TgAlbumToPic)

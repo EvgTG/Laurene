@@ -3,7 +3,7 @@ package mainpac
 import (
 	"Laurene/util"
 	"fmt"
-	tb "gopkg.in/tucnak/telebot.v2"
+	tb "gopkg.in/tucnak/telebot.v3"
 	"strings"
 	"time"
 )
@@ -17,7 +17,7 @@ func (tg *TG) isAdmin(user *tb.User, chat int64) bool {
 
 func (tg *TG) sendToSlice(slice []int64, mesText string) {
 	for _, chatID := range slice {
-		tg.Bot.Send(&tb.User{ID: int(chatID)}, mesText, tb.ModeHTML)
+		tg.Bot.Send(&tb.User{ID: chatID}, mesText, tb.ModeHTML)
 	}
 }
 
@@ -35,7 +35,7 @@ func (tg *TG) uptimeString(timestamp time.Time) string {
 	return hoursStr + uptime.String()
 }
 
-func (tg *TG) addBtn(btn tb.Btn, key string, handler interface{}) {
+func (tg *TG) addBtn(btn tb.Btn, key string, handler tb.HandlerFunc) {
 	tg.Buttons[key] = &btn
 	tg.Bot.Handle(&btn, handler)
 }
