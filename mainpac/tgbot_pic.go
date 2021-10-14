@@ -73,7 +73,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		pathes = append(pathes, path)
 		err := s.TG.Bot.Download(photo.MediaFile(), path)
 		if err != nil {
-			log.Warn(errors.Wrap(err, "TgAlbumToPic Bot.Download"))
+			log.Error(errors.Wrap(err, "TgAlbumToPic Bot.Download"))
 			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка скачивания, попробуйте позже.", ShowAlert: true})
 			return
 		}
@@ -82,7 +82,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 	for _, path := range pathes {
 		imgFile, err := os.Open(path)
 		if err != nil {
-			log.Warn(errors.Wrap(err, "TgAlbumToPic os.Open"))
+			log.Error(errors.Wrap(err, "TgAlbumToPic os.Open"))
 			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка файлов, попробуйте позже.", ShowAlert: true})
 			return
 		}
@@ -90,7 +90,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 
 		img, _, err := image.Decode(imgFile)
 		if err != nil {
-			log.Warn(errors.Wrap(err, "TgAlbumToPic image.Decode"))
+			log.Error(errors.Wrap(err, "TgAlbumToPic image.Decode"))
 			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка файлов, попробуйте позже.", ShowAlert: true})
 			return
 		}
@@ -214,7 +214,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 	defer os.Remove(outPath)
 	out, err := os.Create(outPath)
 	if err != nil {
-		log.Warn(errors.Wrap(err, "TgAlbumToPic os.Create(outPath)"))
+		log.Error(errors.Wrap(err, "TgAlbumToPic os.Create(outPath)"))
 		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка файлов, попробуйте позже.", ShowAlert: true})
 		return
 	}
@@ -224,7 +224,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 	opt.Quality = 85
 	err = jpeg.Encode(out, rgba, &opt)
 	if err != nil {
-		log.Warn(errors.Wrap(err, "TgAlbumToPic jpeg.Encode"))
+		log.Error(errors.Wrap(err, "TgAlbumToPic jpeg.Encode"))
 		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка файлов, попробуйте позже.", ShowAlert: true})
 		return
 	}
