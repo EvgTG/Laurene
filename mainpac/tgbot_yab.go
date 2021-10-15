@@ -38,8 +38,9 @@ func (s *Service) TgInfoUserYAB(x tb.Context) (errReturn error) {
 
 	nick := strings.Replace(text, "[BOT] Информация о ", "", 1)
 	nick = nick[:strings.Index(nick, ":\n")]
-	textSend := fmt.Sprintf("%v\n\nС нами %v\nПоследний раз писал %v",
-		nick, tmStart.Format("2006-01-02 15:04:05"), tmLastAction.Format("2006-01-02 15:04:05"))
+	loc, _ := time.LoadLocation("Europe/Moscow")
+	textSend := fmt.Sprintf("%v\n\nС нами с %v\nПоследний раз писал в %v",
+		nick, tmStart.In(loc).Format("2006-01-02 15:04:05"), tmLastAction.In(loc).Format("2006-01-02 15:04:05"))
 
 	x.Send(textSend)
 	return
