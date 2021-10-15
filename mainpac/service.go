@@ -7,14 +7,16 @@ import (
 	"fmt"
 	tb "gopkg.in/tucnak/telebot.v3"
 	"math/rand"
+	"regexp"
 	"time"
 )
 
 type Service struct {
-	TG   *TG
-	DB   *model.Model
-	Loc  *time.Location
-	Rand *rand.Rand
+	TG    *TG
+	Other Other
+	DB    *model.Model
+	Loc   *time.Location
+	Rand  *rand.Rand
 }
 
 type TG struct {
@@ -27,7 +29,12 @@ type TG struct {
 	Uptime        time.Time
 	Buttons       map[string]*tb.Btn
 	CallbackQuery map[int64]string //контекстный ввод
+
 	AlbumsManager *util.AlbumsManager
+}
+
+type Other struct {
+	YetAnotherBotInfoUserRGX *regexp.Regexp
 }
 
 func (s Service) Start() {

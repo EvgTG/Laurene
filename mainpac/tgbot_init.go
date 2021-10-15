@@ -1,10 +1,14 @@
 package mainpac
 
 import (
+	"Laurene/util"
 	tb "gopkg.in/tucnak/telebot.v3"
+	"regexp"
 )
 
 func (s *Service) InitTBot() {
+	s.InitRgxs()
+
 	// Команды роуты
 
 	s.TG.Bot.Handle("/start", s.TgStartCMD)
@@ -17,7 +21,7 @@ func (s *Service) InitTBot() {
 	s.TG.Bot.Handle("/adm", s.TgAdm)
 	s.TG.Bot.Handle("/status", s.TgStatusCMD)
 	s.TG.Bot.Handle("/logs", s.TgLogsCMD)
-	s.TG.Bot.Handle(tb.OnText, s.TgCallbackQuery)
+	s.TG.Bot.Handle(tb.OnText, s.TgOnText)
 
 	// Кнопки роуты
 
@@ -46,3 +50,10 @@ s.TG.Bot.Handle("/", s.Tg)
 s.TG.addBtn(rm.Data("", ""), "", s.Tg)
 
 */
+
+func (s *Service) InitRgxs() {
+	var err error
+
+	s.Other.YetAnotherBotInfoUserRGX, err = regexp.Compile("^\\[BOT\\] Информация о .{1,2} #.+:\\n")
+	util.ErrCheckFatal(err, "InitRgxs", "YetAnotherBotInfoUserRGX")
+}
