@@ -20,7 +20,8 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 		"Приветствую, бот имеет следующие возможности:" +
 		"\n" +
 		"\n• Склейка фото, если прислать или переслать альбом." +
-		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot (переслать)"
+		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot (переслать)." +
+		"\n• Написание текста в обратном порядке."
 
 	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true})
 	return
