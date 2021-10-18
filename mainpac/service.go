@@ -31,6 +31,11 @@ type TG struct {
 	CallbackQuery map[int64]string //контекстный ввод
 
 	AlbumsManager *util.AlbumsManager
+
+	menu struct {
+		picBtns  *tb.ReplyMarkup
+		textBtns *tb.ReplyMarkup
+	}
 }
 
 type Other struct {

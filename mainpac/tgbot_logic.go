@@ -22,7 +22,33 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 		"\n• Склейка фото, если прислать или переслать альбом." +
 		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot (переслать)"
 
-	s.TG.Bot.Send(x.Sender(), text, &tb.ReplyMarkup{RemoveKeyboard: true})
+	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true})
+	return
+}
+
+func (s *Service) TgOnText(x tb.Context) (errReturn error) {
+	//if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+	//	return
+	//}
+
+	switch {
+	case s.Other.YetAnotherBotInfoUserRGX.MatchString(x.Text()):
+		s.TgInfoUserYAB(x)
+		return
+	default:
+		text := "" +
+			"Что сделать с текстом?" +
+			"\n" +
+			"\n1. Написать в обратном порядке"
+
+		x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.textBtns)
+	}
+
+	switch s.TG.CallbackQuery[x.Chat().ID] {
+	case "": //Нет в CallbackQuery - игнор
+	case "test":
+
+	}
 	return
 }
 
@@ -37,7 +63,7 @@ func (s *Service) TgTest(x tb.Context) (errReturn error) {
 	btn := *s.TG.Buttons["test"]
 	rm.Inline([]tb.Btn{btn})
 
-	s.TG.Bot.Send(x.Sender(), "Test", rm, tb.ModeHTML, tb.NoPreview)
+	x.Send("Test", rm, tb.ModeHTML, tb.NoPreview)
 	return
 }
 
@@ -50,7 +76,7 @@ func (s *Service) TgTestBtn(x tb.Context) (errReturn error) {
 	btn := *s.TG.Buttons["test"]
 	rm.Inline([]tb.Btn{btn})
 
-	s.TG.Bot.Send(x.Sender(), "Test", &tb.SendOptions{ReplyTo: x.Message()}, rm, tb.ModeHTML, tb.NoPreview)
+	x.Send("Test", &tb.SendOptions{ReplyTo: x.Message()}, rm, tb.ModeHTML, tb.NoPreview)
 	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "test"})
 	return
 }
@@ -68,7 +94,7 @@ func (s *Service) TgAdm(x tb.Context) (errReturn error) {
 		"\n/logs - действия над логами",
 	)
 
-	s.TG.Bot.Send(x.Sender(), text, tb.ModeHTML)
+	x.Send(text, tb.ModeHTML)
 	return
 }
 
@@ -78,7 +104,7 @@ func (s *Service) TgStatusCMD(x tb.Context) (errReturn error) {
 	}
 
 	text, rm := s.TgStatusFunc()
-	s.TG.Bot.Send(x.Sender(), text, rm)
+	x.Send(text, rm)
 	return
 }
 
@@ -114,7 +140,7 @@ func (s *Service) TgLogsCMD(x tb.Context) (errReturn error) {
 	rm.Inline(
 		[]tb.Btn{*s.TG.Buttons["get_logs"], *s.TG.Buttons["clear_logs"]},
 	)
-	s.TG.Bot.Send(x.Sender(), text, rm, tb.ModeHTML)
+	x.Send(text, rm, tb.ModeHTML)
 	return
 }
 
@@ -123,9 +149,9 @@ func (s *Service) TgGetLogsBtn(x tb.Context) (errReturn error) {
 		return
 	}
 
-	_, err := s.TG.Bot.Send(x.Sender(), &tb.Document{File: tb.FromDisk("files/logrus.log"), FileName: "logrus.log"})
+	err := x.Send(&tb.Document{File: tb.FromDisk("files/logrus.log"), FileName: "logrus.log"})
 	if err != nil {
-		s.TG.Bot.Send(x.Sender(), errors.Wrap(err, "Ошибка отправки файла.").Error())
+		x.Send(errors.Wrap(err, "Ошибка отправки файла.").Error())
 	}
 	x.Respond()
 	return
@@ -143,31 +169,13 @@ func (s *Service) TgClearLogsBtn(x tb.Context) (errReturn error) {
 	return
 }
 
-func (s *Service) TgOnText(x tb.Context) (errReturn error) {
-	//if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
-	//	return
-	//}
-
-	switch {
-	case s.Other.YetAnotherBotInfoUserRGX.MatchString(x.Text()):
-		s.TgInfoUserYAB(x)
-		return
-	}
-
-	switch s.TG.CallbackQuery[x.Chat().ID] {
-	case "": //Нет в CallbackQuery - игнор
-	case "test":
-
-	}
-	return
-}
-
 func (s *Service) TgDeleteBtn(x tb.Context) (errReturn error) {
 	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
 		return
 	}
 	x.Respond()
 	s.TG.Bot.Delete(x.Message())
+	x.Delete()
 	return
 }
 
@@ -176,7 +184,7 @@ func (s *Service) TgCancelReplyMarkup(x tb.Context) (errReturn error) {
 		return
 	}
 	delete(s.TG.CallbackQuery, x.Chat().ID)
-	s.TG.Bot.Send(x.Sender(), "Отменено.", &tb.ReplyMarkup{RemoveKeyboard: true})
+	x.Send("Отменено.", &tb.ReplyMarkup{RemoveKeyboard: true})
 	return
 }
 
@@ -188,7 +196,7 @@ func (s *Service) TgBtn(x tb.Context) (errReturn error) {
 	}
 
 	//text, rm := s.TgFunc()
-	//s.TG.Bot.Send(x.Sender(), text, rm, tb.ModeHTML)
+	//x.Send(text, rm, tb.ModeHTML)
 	//s.TG.Bot.Edit(x.Message(), text, rm)
 	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: ""})
 }
@@ -202,7 +210,7 @@ func (s *Service) TgCMD(x tb.Context) (errReturn error) {
 	rm.Inline(
 		[]tb.Btn{*s.TG.Buttons["status_update"]},
 	)
-	s.TG.Bot.Send(x.Sender(), text, rm, tb.ModeHTML)
+	x.Send(text, rm, tb.ModeHTML)
 }
 
 func (s *Service) TgFunc() (string, *tb.ReplyMarkup) {

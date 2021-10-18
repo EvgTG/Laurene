@@ -23,7 +23,7 @@ func (s *Service) TgPic(x tb.Context) (errReturn error) {
 	}
 
 	if x.Message().AlbumID == "" {
-		s.TG.Bot.Send(x.Sender(), "Нет действий.", &tb.SendOptions{ReplyTo: x.Message()})
+		x.Send("Нет действий.", &tb.SendOptions{ReplyTo: x.Message()})
 		return
 	}
 
@@ -32,9 +32,7 @@ func (s *Service) TgPic(x tb.Context) (errReturn error) {
 		"\n" +
 		"\n1. Объединить фотографии"
 
-	rm := &tb.ReplyMarkup{}
-	rm.Inline([]tb.Btn{*s.TG.Buttons["album_to_pic_down"], *s.TG.Buttons["album_to_pic_right"], *s.TG.Buttons["album_to_pic_mesh"]})
-	s.TG.Bot.Send(x.Sender(), text, &tb.SendOptions{ReplyTo: x.Message()}, rm)
+	x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.picBtns)
 	return
 }
 
@@ -71,7 +69,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		photo := mes.Photo
 		path := dir + photo.FileID + ".jpg"
 		pathes = append(pathes, path)
-		err := s.TG.Bot.Download(photo.MediaFile(), path)
+		err := x.Bot().Download(photo.MediaFile(), path)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgAlbumToPic Bot.Download"))
 			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка скачивания, попробуйте позже.", ShowAlert: true})
@@ -231,13 +229,13 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 
 	rm := &tb.ReplyMarkup{}
 	rm.Inline([]tb.Btn{*s.TG.Buttons["picfile_to_pic"]})
-	_, err = s.TG.Bot.Send(x.Sender(), &tb.Document{File: tb.FromDisk(outPath), FileName: "pic.jpg", Caption: photosMes[0].Caption}, rm)
+	err = x.Send(&tb.Document{File: tb.FromDisk(outPath), FileName: "pic.jpg", Caption: photosMes[0].Caption}, rm)
 	if err != nil {
 		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка отправки.", ShowAlert: true})
 		return
 	}
 	x.Respond()
-	_, err = s.TG.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, c.Data)})
+	_, err = x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, c.Data)})
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -260,14 +258,14 @@ func (s *Service) TgFilePicToPic(x tb.Context) (errReturn error) {
 
 	outPath := "files/temp/" + util.CreateKey(12) + ".jpg"
 	defer os.Remove(outPath)
-	err := s.TG.Bot.Download(x.Message().Document.MediaFile(), outPath)
+	err := x.Bot().Download(x.Message().Document.MediaFile(), outPath)
 	if err != nil {
 		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка"})
 		return
 	}
 
-	s.TG.Bot.Send(x.Sender(), &tb.Photo{File: tb.FromDisk(outPath), Caption: x.Message().Caption})
-	s.TG.Bot.EditReplyMarkup(x.Message(), nil)
+	x.Send(&tb.Photo{File: tb.FromDisk(outPath), Caption: x.Message().Caption})
+	x.Bot().EditReplyMarkup(x.Message(), nil)
 	x.Respond()
 	return
 }
