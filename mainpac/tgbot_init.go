@@ -14,6 +14,7 @@ func (s *Service) InitTBot() {
 	s.TG.Bot.Handle("/start", s.TgStartCMD)
 	s.TG.Bot.Handle("/help", s.TgStartCMD)
 	s.TG.Bot.Handle(tb.OnPhoto, s.TgPic)
+	s.TG.Bot.Handle(tb.OnText, s.TgOnText)
 
 	// Админские команды
 
@@ -21,7 +22,6 @@ func (s *Service) InitTBot() {
 	s.TG.Bot.Handle("/adm", s.TgAdm)
 	s.TG.Bot.Handle("/status", s.TgStatusCMD)
 	s.TG.Bot.Handle("/logs", s.TgLogsCMD)
-	s.TG.Bot.Handle(tb.OnText, s.TgOnText)
 
 	// Кнопки роуты
 

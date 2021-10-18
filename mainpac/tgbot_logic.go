@@ -144,9 +144,9 @@ func (s *Service) TgClearLogsBtn(x tb.Context) (errReturn error) {
 }
 
 func (s *Service) TgOnText(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
-		return
-	}
+	//if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+	//	return
+	//}
 
 	switch {
 	case s.Other.YetAnotherBotInfoUserRGX.MatchString(x.Text()):
