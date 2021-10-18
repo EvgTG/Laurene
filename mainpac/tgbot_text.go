@@ -8,16 +8,12 @@ func (s *Service) TgTextReverse(x tb.Context) (errReturn error) {
 		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка", ShowAlert: true})
 		return
 	}
-	text := x.Message().ReplyTo.Text
 
-	xlist := []rune(text)
-	ln := len(xlist)
-	xlistRevers := make([]rune, 0, ln)
-	for i := 0; i < ln; i++ {
-		xlistRevers = append(xlistRevers, xlist[ln-i-1])
+	r := []rune(x.Message().ReplyTo.Text)
+	for i, j := 0, len(r)-1; i < len(r)/2; i, j = i+1, j-1 {
+		r[i], r[j] = r[j], r[i]
 	}
-	textRevers := string(xlistRevers)
 
-	x.Send(textRevers)
+	x.Send(string(r))
 	return
 }
