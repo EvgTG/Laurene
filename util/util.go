@@ -49,6 +49,14 @@ func ErrCheckFatal(err error, strs ...string) {
 	}
 }
 
+func TextCut(s string, n int) string {
+	r := []rune(s)
+	if len(r) > n {
+		return string(r[:n]) + "..."
+	}
+	return s
+}
+
 func FloatCut(f float64) string {
 	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.8f", f), "0"), ".")
 }

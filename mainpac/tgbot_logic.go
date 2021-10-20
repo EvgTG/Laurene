@@ -2,10 +2,13 @@ package mainpac
 
 import (
 	"Laurene/go-log"
+	"Laurene/util"
 	"fmt"
 	"github.com/pkg/errors"
 	tb "gopkg.in/tucnak/telebot.v3"
 	"os"
+	"strconv"
+	"strings"
 )
 
 /*
@@ -19,11 +22,16 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 	text := "" +
 		"Приветствую, бот имеет следующие возможности:" +
 		"\n" +
+		"\n<b>Текст:</b>  (доступно в инлайн режиме)" +
+		"\n• Написание текста в обратном порядке." +
+		"\n• Текст в верхнем регистре." +
+		"\n• Текст в случайном регистре." +
+		"\n" +
+		"\n<b>Разное:</b>" +
 		"\n• Склейка фото, если прислать или переслать альбом." +
-		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot (переслать)." +
-		"\n• Написание текста в обратном порядке (доступно и в инлайн режиме)."
+		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot (переслать)."
 
-	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true})
+	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true}, tb.ModeHTML)
 	return
 }
 
@@ -36,7 +44,9 @@ func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 		text := "" +
 			"Что сделать с текстом?" +
 			"\n" +
-			"\n1. Написать в обратном порядке"
+			"\n1. Написать в обратном порядке" +
+			"\n2. Написать в верхнем регистре" +
+			"\n3. Написать в случайном регистре"
 
 		x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.textBtns)
 	}
@@ -58,13 +68,24 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 		return
 	}
 
-	res := make([]tb.Result, 0, 1)
+	res := make([]tb.Result, 0, 2)
 	text := ""
 
 	// Текст в обратном порядке
 	text = textReverse(q.Text)
-	res = append(res, &tb.ArticleResult{Title: "Текст в обратном порядке", Text: text, Description: text})
+	res = append(res, &tb.ArticleResult{Title: "Текст в обратном порядке", Text: text, Description: util.TextCut(text, 50)})
 
+	// Текст в верхнем регистре
+	text = strings.ToUpper(q.Text)
+	res = append(res, &tb.ArticleResult{Title: "Текст в верхнем регистре", Text: text, Description: util.TextCut(text, 50)})
+
+	// Текст в случайном регистре
+	text = textRandom(q.Text, s.Rand)
+	res = append(res, &tb.ArticleResult{Title: "Текст в случайном регистре", Text: text, Description: util.TextCut(text, 50)})
+
+	for i := range res {
+		res[i].SetResultID(strconv.Itoa(i))
+	}
 	qr := &tb.QueryResponse{
 		QueryID:    q.ID,
 		CacheTime:  0,

@@ -35,13 +35,15 @@ func (s *Service) InitTBot() {
 	s.TG.addBtn(rm.Data("1️⃣ вправо", "album_to_pic_right", "right"), "album_to_pic_right", s.TgAlbumToPic)
 	s.TG.addBtn(rm.Data("1️⃣ сеткой", "album_to_pic_mesh", "mesh"), "album_to_pic_mesh", s.TgAlbumToPic)
 	s.TG.addBtn(rm.Data("🖼 Отправить картинкой", "picfile_to_pic"), "picfile_to_pic", s.TgFilePicToPic)
-	s.TG.addBtn(rm.Data("1️⃣", "text_reverse"), "text_reverse", s.TgTextReverse)
+	s.TG.addBtn(rm.Data("1️⃣", "text_reverse", "1"), "text_reverse", s.TgTextReverse)
+	s.TG.addBtn(rm.Data("2️⃣", "text_toupper", "2"), "text_toupper", s.TgTextToUpper)
+	s.TG.addBtn(rm.Data("3️⃣", "text_random", "3"), "text_random", s.TgTextRandom)
 
 	s.TG.menu.picBtns = &tb.ReplyMarkup{}
 	s.TG.menu.picBtns.Inline([]tb.Btn{*s.TG.Buttons["album_to_pic_down"], *s.TG.Buttons["album_to_pic_right"], *s.TG.Buttons["album_to_pic_mesh"]})
 
 	s.TG.menu.textBtns = &tb.ReplyMarkup{}
-	s.TG.menu.textBtns.Inline([]tb.Btn{*s.TG.Buttons["text_reverse"]})
+	s.TG.menu.textBtns.Inline([]tb.Btn{*s.TG.Buttons["text_reverse"], *s.TG.Buttons["text_toupper"], *s.TG.Buttons["text_random"]})
 
 	// Админские кнопки
 

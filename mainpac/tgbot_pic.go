@@ -3,7 +3,6 @@ package mainpac
 import (
 	"Laurene/go-log"
 	"Laurene/util"
-	"fmt"
 	"github.com/pkg/errors"
 	tb "gopkg.in/tucnak/telebot.v3"
 	"image"
@@ -235,10 +234,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		return
 	}
 	x.Respond()
-	_, err = x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, c.Data)})
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, c.Data)})
 	return
 }
 
