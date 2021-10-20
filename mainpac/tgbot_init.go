@@ -15,6 +15,7 @@ func (s *Service) InitTBot() {
 	s.TG.Bot.Handle("/help", s.TgStartCMD)
 	s.TG.Bot.Handle(tb.OnPhoto, s.TgPic)
 	s.TG.Bot.Handle(tb.OnText, s.TgOnText)
+	s.TG.Bot.Handle(tb.OnQuery, s.TgOnTextInline)
 
 	// Админские команды
 

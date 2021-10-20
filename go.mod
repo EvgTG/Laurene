@@ -8,7 +8,7 @@ require (
 	github.com/spf13/viper v1.9.0
 	go.mongodb.org/mongo-driver v1.7.3
 	go.uber.org/fx v1.14.2
-	gopkg.in/tucnak/telebot.v3 v3.0.0-20211013181523-568f6ea29964
+	gopkg.in/tucnak/telebot.v3 v3.0.0-20211015201320-13d54ae7338e
 )
 
 require (

@@ -21,17 +21,13 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 		"\n" +
 		"\n• Склейка фото, если прислать или переслать альбом." +
 		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot (переслать)." +
-		"\n• Написание текста в обратном порядке."
+		"\n• Написание текста в обратном порядке (доступно и в инлайн режиме)."
 
 	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true})
 	return
 }
 
 func (s *Service) TgOnText(x tb.Context) (errReturn error) {
-	//if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
-	//	return
-	//}
-
 	switch {
 	case s.Other.YetAnotherBotInfoUserRGX.MatchString(x.Text()):
 		s.TgInfoUserYAB(x)
@@ -50,6 +46,33 @@ func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 	case "test":
 
 	}
+	return
+}
+
+func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
+	q := x.Query()
+	if q == nil {
+		return
+	}
+	if q.Text == "" {
+		return
+	}
+
+	res := make([]tb.Result, 0, 1)
+	text := ""
+
+	// Текст в обратном порядке
+	text = textReverse(q.Text)
+	res = append(res, &tb.ArticleResult{Title: "Текст в обратном порядке", Text: text, Description: text})
+
+	qr := &tb.QueryResponse{
+		QueryID:    q.ID,
+		CacheTime:  0,
+		IsPersonal: true,
+		Results:    res,
+	}
+	x.Answer(qr)
+
 	return
 }
 

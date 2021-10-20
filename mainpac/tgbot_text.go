@@ -9,11 +9,14 @@ func (s *Service) TgTextReverse(x tb.Context) (errReturn error) {
 		return
 	}
 
-	r := []rune(x.Message().ReplyTo.Text)
-	for i, j := 0, len(r)-1; i < len(r)/2; i, j = i+1, j-1 {
-		r[i], r[j] = r[j], r[i]
-	}
+	x.Send(textReverse(x.Message().ReplyTo.Text))
+	return
+}
 
-	x.Send(string(r))
+func textReverse(s string) (res string) {
+	r := []rune(s)
+	for _, v := range r {
+		res = string(v) + res
+	}
 	return
 }
