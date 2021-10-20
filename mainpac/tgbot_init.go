@@ -23,6 +23,7 @@ func (s *Service) InitTBot() {
 	s.TG.Bot.Handle("/adm", s.TgAdm)
 	s.TG.Bot.Handle("/status", s.TgStatusCMD)
 	s.TG.Bot.Handle("/logs", s.TgLogsCMD)
+	s.TG.Bot.Handle("/setCmds", s.TgSetCmds)
 
 	// Кнопки роуты
 

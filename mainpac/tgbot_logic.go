@@ -115,7 +115,8 @@ func (s *Service) TgAdm(x tb.Context) (errReturn error) {
 		"\n/start - приветствие" +
 		"\n\n<b>Админские команды:</b>" +
 		"\n/status - статус работы" +
-		"\n/logs - действия над логами",
+		"\n/logs - действия над логами" +
+		"\n/setCmds - установить команды бота",
 	)
 
 	x.Send(text, tb.ModeHTML)
@@ -209,6 +210,19 @@ func (s *Service) TgCancelReplyMarkup(x tb.Context) (errReturn error) {
 	}
 	delete(s.TG.CallbackQuery, x.Chat().ID)
 	x.Send("Отменено.", &tb.ReplyMarkup{RemoveKeyboard: true})
+	return
+}
+
+func (s *Service) TgSetCmds(x tb.Context) (errReturn error) {
+	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+		return
+	}
+
+	x.Bot().SetCommands([]tb.Command{
+		tb.Command{"help", "Список возможностей"},
+	})
+
+	x.Send("Сделано")
 	return
 }
 
