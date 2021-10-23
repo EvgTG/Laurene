@@ -84,7 +84,7 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 	text = s.Other.AtbashAlphabet.Replace(q.Text)
 	key := util.CreateKey(8)
 	s.Other.AtbashCache.Add(key, q.Text)
-	ar = &tb.ArticleResult{Title: "Кодировать шифром Атбаша", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar = &tb.ArticleResult{Title: "Кодировать шифром Атбаш", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	rm := *s.TG.menu.atbashBtns2
 	rm.InlineKeyboard[0][0].Data = key
