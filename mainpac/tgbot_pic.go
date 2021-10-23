@@ -4,9 +4,9 @@ import (
 	"Laurene/go-log"
 	"Laurene/util"
 	"github.com/pkg/errors"
+	"golang.org/x/image/draw"
 	tb "gopkg.in/tucnak/telebot.v3"
 	"image"
-	"image/draw"
 	"image/jpeg"
 	"os"
 	"sort"
@@ -102,70 +102,57 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		c.Data = "right"
 	}
 
+	var maxX, maxY int
+	for _, img := range images {
+		if img.Bounds().Max.X > maxX {
+			maxX = img.Bounds().Max.X
+		}
+		if img.Bounds().Max.Y > maxY {
+			maxY = img.Bounds().Max.Y
+		}
+	}
 	switch c.Data {
 	case "down":
-		var sumY, sumYi, maxX, maxY int
+		var sumY, sumYi int
 		for _, img := range images {
-			if img.Bounds().Max.X > maxX {
-				maxX = img.Bounds().Max.X
-			}
-			if img.Bounds().Max.Y > maxY {
-				maxY = img.Bounds().Max.Y
-			}
-			sumY += img.Bounds().Max.Y
+			a := float64(maxX) / float64(img.Bounds().Max.X)
+			sumY += int(float64(img.Bounds().Max.Y) * a)
 		}
 
 		rgba = image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{maxX, sumY}})
 		for _, img := range images {
-			x := 0
-			if maxX != img.Bounds().Max.X {
-				x = (maxX - img.Bounds().Max.X) / 2
-			}
+			a := float64(maxX) / float64(img.Bounds().Max.X)
+			yPlus := int(float64(img.Bounds().Max.Y) * a)
 
-			p1 := image.Point{x, sumYi}
-			p2 := image.Point{img.Bounds().Max.X + x, sumYi + img.Bounds().Max.Y}
+			p1 := image.Point{0, sumYi}
+			p2 := image.Point{maxX, sumYi + yPlus}
 			r := image.Rectangle{p1, p2}
 
-			draw.Draw(rgba, r, img, image.Point{0, 0}, draw.Src)
-			sumYi += img.Bounds().Max.Y
+			draw.BiLinear.Scale(rgba, r, img, img.Bounds(), draw.Over, nil)
+			sumYi += yPlus
 		}
 	case "right":
-		var sumX, sumXi, maxX, maxY int
+		var sumX, sumXi int
 		for _, img := range images {
-			if img.Bounds().Max.X > maxX {
-				maxX = img.Bounds().Max.X
-			}
-			if img.Bounds().Max.Y > maxY {
-				maxY = img.Bounds().Max.Y
-			}
-			sumX += img.Bounds().Max.X
+			a := float64(maxY) / float64(img.Bounds().Max.Y)
+			sumX += int(float64(img.Bounds().Max.X) * a)
 		}
 
 		rgba = image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{sumX, maxY}})
 		for _, img := range images {
-			y := 0
-			if maxY != img.Bounds().Max.Y {
-				y = (maxY - img.Bounds().Max.Y) / 2
-			}
+			a := float64(maxY) / float64(img.Bounds().Max.Y)
+			xPlus := int(float64(img.Bounds().Max.X) * a)
 
-			p1 := image.Point{sumXi, y}
-			p2 := image.Point{sumXi + img.Bounds().Max.X, img.Bounds().Max.Y + y}
+			p1 := image.Point{sumXi, 0}
+			p2 := image.Point{sumXi + xPlus, maxY}
 			r := image.Rectangle{p1, p2}
 
-			draw.Draw(rgba, r, img, image.Point{0, 0}, draw.Src)
-			sumXi += img.Bounds().Max.X
+			draw.BiLinear.Scale(rgba, r, img, img.Bounds(), draw.Over, nil)
+			sumXi += xPlus
 		}
 	case "mesh":
 		ln := len(images)
-		var sumX, sumY, maxX, maxY int
-		for _, img := range images {
-			if img.Bounds().Max.X > maxX {
-				maxX = img.Bounds().Max.X
-			}
-			if img.Bounds().Max.Y > maxY {
-				maxY = img.Bounds().Max.Y
-			}
-		}
+		var sumX, sumY int
 
 		xyi, yminus := 0, 0
 		for {
@@ -181,16 +168,21 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		ii := 0
 		rgba = image.NewRGBA(image.Rectangle{image.Point{0, 0}, image.Point{xyi * maxX, (xyi - yminus) * maxY}})
 		for _, img := range images {
-			x, y := 0, 0
-			if maxX != img.Bounds().Max.X {
-				x = (maxX - img.Bounds().Max.X) / 2
-			}
-			if maxY != img.Bounds().Max.Y {
-				y = (maxY - img.Bounds().Max.Y) / 2
+			x, y, xPlus, yPlus := 0, 0, 0, 0
+			if maxX-img.Bounds().Max.X <= maxY-img.Bounds().Max.Y {
+				a := float64(maxX) / float64(img.Bounds().Max.X)
+				yPlus = int(float64(img.Bounds().Max.Y) * a)
+				xPlus = maxX
+				x, y = 0, (maxY-yPlus)/2
+			} else {
+				a := float64(maxY) / float64(img.Bounds().Max.Y)
+				xPlus = int(float64(img.Bounds().Max.X) * a)
+				yPlus = maxY
+				x, y = (maxY-xPlus)/2, 0
 			}
 
 			p1 := image.Point{x + sumX, y + sumY}
-			p2 := image.Point{x + sumX + img.Bounds().Max.X, y + sumY + img.Bounds().Max.Y}
+			p2 := image.Point{x + sumX + xPlus, y + sumY + yPlus}
 			r := image.Rectangle{p1, p2}
 			sumX += maxX
 			if xyi == ii+1 {
@@ -200,7 +192,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 			}
 			ii++
 
-			draw.Draw(rgba, r, img, image.Point{0, 0}, draw.Src)
+			draw.BiLinear.Scale(rgba, r, img, img.Bounds(), draw.Over, nil)
 		}
 	default:
 		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите создателю."})
@@ -234,7 +226,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		return
 	}
 	x.Respond()
-	x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, c.Data)})
+	//x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, c.Data)})
 	return
 }
 
