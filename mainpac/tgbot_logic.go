@@ -26,6 +26,7 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 		"\n• Написание текста в обратном порядке." +
 		"\n• Текст в верхнем регистре." +
 		"\n• Текст в случайном регистре." +
+		"\n• Шифр Атбаш" +
 		"\n" +
 		"\n<b>Разное:</b>" +
 		"\n• Склейка фото, если прислать или переслать альбом." +
@@ -44,9 +45,10 @@ func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 		text := "" +
 			"Что сделать с текстом?" +
 			"\n" +
-			"\n1. Написать в обратном порядке" +
-			"\n2. Написать в верхнем регистре" +
-			"\n3. Написать в случайном регистре"
+			"\n1. Обратный порядок" +
+			"\n2. В верхнем регистре" +
+			"\n3. В случайном регистре" +
+			"\n4. Шифр Атбаш"
 
 		x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.textBtns)
 	}
@@ -70,18 +72,36 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 
 	res := make([]tb.Result, 0, 2)
 	text := ""
+	q.Text = strings.TrimSpace(q.Text)
 
 	// Текст в обратном порядке
 	text = textReverse(q.Text)
-	res = append(res, &tb.ArticleResult{Title: "Текст в обратном порядке", Text: text, Description: util.TextCut(text, 50)})
+	ar := &tb.ArticleResult{Title: "Текст в обратном порядке", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar.ParseMode = tb.ModeHTML
+	res = append(res, ar)
+
+	// Шифр Атбаша
+	text = s.Other.AtbashAlphabet.Replace(q.Text)
+	key := util.CreateKey(8)
+	s.Other.AtbashCache.Add(key, q.Text)
+	ar = &tb.ArticleResult{Title: "Кодировать шифром Атбаша", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar.ParseMode = tb.ModeHTML
+	rm := *s.TG.menu.atbashBtns2
+	rm.InlineKeyboard[0][0].Data = key
+	ar.ReplyMarkup = &rm
+	res = append(res, ar)
 
 	// Текст в верхнем регистре
 	text = strings.ToUpper(q.Text)
-	res = append(res, &tb.ArticleResult{Title: "Текст в верхнем регистре", Text: text, Description: util.TextCut(text, 50)})
+	ar = &tb.ArticleResult{Title: "Текст в верхнем регистре", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar.ParseMode = tb.ModeHTML
+	res = append(res, ar)
 
 	// Текст в случайном регистре
 	text = textRandom(q.Text, s.Rand)
-	res = append(res, &tb.ArticleResult{Title: "Текст в случайном регистре", Text: text, Description: util.TextCut(text, 50)})
+	ar = &tb.ArticleResult{Title: "Текст в случайном регистре", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar.ParseMode = tb.ModeHTML
+	res = append(res, ar)
 
 	for i := range res {
 		res[i].SetResultID(strconv.Itoa(i))

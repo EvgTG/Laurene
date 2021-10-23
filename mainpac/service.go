@@ -5,9 +5,11 @@ import (
 	"Laurene/model"
 	"Laurene/util"
 	"fmt"
+	lru "github.com/hashicorp/golang-lru"
 	tb "gopkg.in/tucnak/telebot.v3"
 	"math/rand"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -33,13 +35,17 @@ type TG struct {
 	AlbumsManager *util.AlbumsManager
 
 	menu struct {
-		picBtns  *tb.ReplyMarkup
-		textBtns *tb.ReplyMarkup
+		picBtns     *tb.ReplyMarkup
+		textBtns    *tb.ReplyMarkup
+		atbashBtns  *tb.ReplyMarkup
+		atbashBtns2 *tb.InlineKeyboardMarkup
 	}
 }
 
 type Other struct {
 	YetAnotherBotInfoUserRGX *regexp.Regexp
+	AtbashAlphabet           *strings.Replacer
+	AtbashCache              *lru.Cache
 }
 
 func (s Service) Start() {

@@ -2,12 +2,14 @@ package mainpac
 
 import (
 	"Laurene/util"
+	lru "github.com/hashicorp/golang-lru"
 	tb "gopkg.in/tucnak/telebot.v3"
 	"regexp"
+	"strings"
 )
 
 func (s *Service) InitTBot() {
-	s.InitRgxs()
+	s.InitOther()
 
 	// Команды роуты
 
@@ -30,6 +32,8 @@ func (s *Service) InitTBot() {
 	rm := &tb.ReplyMarkup{}
 	im := &tb.ReplyMarkup{ResizeKeyboard: true}
 	s.TG.Buttons = make(map[string]*tb.Btn)
+	iq := rm.Data("Написать", "")
+	iq.InlineQueryChat = " "
 
 	s.TG.addBtn(rm.Data("1️⃣ вниз", "album_to_pic_down", "down"), "album_to_pic_down", s.TgAlbumToPic)
 	s.TG.addBtn(rm.Data("1️⃣ вправо", "album_to_pic_right", "right"), "album_to_pic_right", s.TgAlbumToPic)
@@ -38,12 +42,19 @@ func (s *Service) InitTBot() {
 	s.TG.addBtn(rm.Data("1️⃣", "text_reverse", "1"), "text_reverse", s.TgTextReverse)
 	s.TG.addBtn(rm.Data("2️⃣", "text_toupper", "2"), "text_toupper", s.TgTextToUpper)
 	s.TG.addBtn(rm.Data("3️⃣", "text_random", "3"), "text_random", s.TgTextRandom)
+	s.TG.addBtn(rm.Data("4️⃣", "text_atbash", "4"), "text_atbash", s.TgTextAtbash)
+	s.TG.addBtn(rm.Data("Расшифровать", "atbash_btn"), "atbash_btn", s.TgTextAtbashBtn)
+	s.TG.addBtn(iq, "iq", s.TgTest)
 
 	s.TG.menu.picBtns = &tb.ReplyMarkup{}
 	s.TG.menu.picBtns.Inline([]tb.Btn{*s.TG.Buttons["album_to_pic_down"], *s.TG.Buttons["album_to_pic_right"], *s.TG.Buttons["album_to_pic_mesh"]})
 
 	s.TG.menu.textBtns = &tb.ReplyMarkup{}
-	s.TG.menu.textBtns.Inline([]tb.Btn{*s.TG.Buttons["text_reverse"], *s.TG.Buttons["text_toupper"], *s.TG.Buttons["text_random"]})
+	s.TG.menu.textBtns.Inline([]tb.Btn{*s.TG.Buttons["text_reverse"], *s.TG.Buttons["text_toupper"], *s.TG.Buttons["text_random"], *s.TG.Buttons["text_atbash"]})
+
+	s.TG.menu.atbashBtns = &tb.ReplyMarkup{}
+	s.TG.menu.atbashBtns.Inline([]tb.Btn{*s.TG.Buttons["atbash_btn"]}, []tb.Btn{*s.TG.Buttons["iq"]})
+	s.TG.menu.atbashBtns2 = &tb.InlineKeyboardMarkup{InlineKeyboard: [][]tb.InlineButton{{*s.TG.Buttons["atbash_btn"].Inline()}, {*s.TG.Buttons["iq"].Inline()}}}
 
 	// Админские кнопки
 
@@ -66,9 +77,32 @@ func (s *Service) TgSome(x tb.Context) (errReturn error) {
 
 */
 
-func (s *Service) InitRgxs() {
+func (s *Service) InitOther() {
 	var err error
 
+	// YetAnotherBot RGX
 	s.Other.YetAnotherBotInfoUserRGX, err = regexp.Compile("^\\[BOT\\] Информация о .{1,2} #.+:\\n")
 	util.ErrCheckFatal(err, "InitRgxs", "YetAnotherBotInfoUserRGX")
+
+	// Atbash Cache
+	s.Other.AtbashCache, _ = lru.New(1000)
+	// Atbash
+	eng := "abcdefghijklmnopqrstuvwxyz"
+	engr := "zyxwvutsrqponmlkjihgfedcba"
+	eng2 := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	eng2r := "ZYXWVUTSRQPONMLKJIHGFEDCBA"
+	ru := "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+	rur := "яюэьыъщшчцхфутсрпонмлкйизжёедгвба"
+	ru2 := "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+	ru2r := "ЯЮЭЬЫЪЩШЧЦХФУТСРПОНМЛКЙИЗЖЁЕДГВБА"
+
+	oldnew := make([]string, 0, 26*4+33*4)
+	alphabets := [][][]rune{{[]rune(eng), []rune(engr)}, {[]rune(eng2), []rune(eng2r)}, {[]rune(ru), []rune(rur)}, {[]rune(ru2), []rune(ru2r)}}
+	for ii := range alphabets {
+		for i := 0; i < len(alphabets[ii][0]); i++ {
+			oldnew = append(oldnew, string(alphabets[ii][0][i]))
+			oldnew = append(oldnew, string(alphabets[ii][1][i]))
+		}
+	}
+	s.Other.AtbashAlphabet = strings.NewReplacer(oldnew...)
 }
