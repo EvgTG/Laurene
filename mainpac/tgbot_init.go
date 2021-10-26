@@ -38,6 +38,12 @@ func (s *Service) InitTBot() {
 	s.TG.addBtn(rm.Data("1️⃣ вниз", "album_to_pic_down", "down"), "album_to_pic_down", s.TgAlbumToPic)
 	s.TG.addBtn(rm.Data("1️⃣ вправо", "album_to_pic_right", "right"), "album_to_pic_right", s.TgAlbumToPic)
 	s.TG.addBtn(rm.Data("1️⃣ сеткой", "album_to_pic_mesh", "mesh"), "album_to_pic_mesh", s.TgAlbumToPic)
+	s.TG.addBtn(rm.Data("2️⃣\U0001F7E9", "album_compress1", "cp1"), "album_compress1", s.TgCompress)
+	s.TG.addBtn(rm.Data("2️⃣\U0001F7E8", "album_compress2", "cp2"), "album_compress2", s.TgCompress)
+	s.TG.addBtn(rm.Data("2️⃣\U0001F7E5", "album_compress3", "cp3"), "album_compress3", s.TgCompress)
+	s.TG.addBtn(rm.Data("1️⃣\U0001F7E9", "pic_compress1", "cp1"), "pic_compress1", s.TgCompress)
+	s.TG.addBtn(rm.Data("1️⃣\U0001F7E8", "pic_compress2", "cp2"), "pic_compress2", s.TgCompress)
+	s.TG.addBtn(rm.Data("1️⃣\U0001F7E5", "pic_compress3", "cp3"), "pic_compress3", s.TgCompress)
 	s.TG.addBtn(rm.Data("🖼 Отправить картинкой", "picfile_to_pic"), "picfile_to_pic", s.TgFilePicToPic)
 	s.TG.addBtn(rm.Data("1️⃣", "text_reverse", "1"), "text_reverse", s.TgTextReverse)
 	s.TG.addBtn(rm.Data("2️⃣", "text_toupper", "2"), "text_toupper", s.TgTextToUpper)
@@ -46,8 +52,13 @@ func (s *Service) InitTBot() {
 	s.TG.addBtn(rm.Data("Расшифровать", "atbash_btn"), "atbash_btn", s.TgTextAtbashBtn)
 	s.TG.addBtn(iq, "iq", s.TgTest)
 
+	s.TG.menu.picAlbumsBtns = &tb.ReplyMarkup{}
+	s.TG.menu.picAlbumsBtns.Inline(
+		[]tb.Btn{*s.TG.Buttons["album_to_pic_down"], *s.TG.Buttons["album_to_pic_right"], *s.TG.Buttons["album_to_pic_mesh"]},
+		[]tb.Btn{*s.TG.Buttons["album_compress1"], *s.TG.Buttons["album_compress2"], *s.TG.Buttons["album_compress3"]},
+	)
 	s.TG.menu.picBtns = &tb.ReplyMarkup{}
-	s.TG.menu.picBtns.Inline([]tb.Btn{*s.TG.Buttons["album_to_pic_down"], *s.TG.Buttons["album_to_pic_right"], *s.TG.Buttons["album_to_pic_mesh"]})
+	s.TG.menu.picBtns.Inline([]tb.Btn{*s.TG.Buttons["pic_compress1"], *s.TG.Buttons["pic_compress2"], *s.TG.Buttons["pic_compress3"]})
 
 	s.TG.menu.textBtns = &tb.ReplyMarkup{}
 	s.TG.menu.textBtns.Inline([]tb.Btn{*s.TG.Buttons["text_reverse"], *s.TG.Buttons["text_toupper"], *s.TG.Buttons["text_random"], *s.TG.Buttons["text_atbash"]})

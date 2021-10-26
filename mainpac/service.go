@@ -35,10 +35,11 @@ type TG struct {
 	AlbumsManager *util.AlbumsManager
 
 	menu struct {
-		picBtns     *tb.ReplyMarkup
-		textBtns    *tb.ReplyMarkup
-		atbashBtns  *tb.ReplyMarkup
-		atbashBtns2 *tb.InlineKeyboardMarkup
+		picAlbumsBtns *tb.ReplyMarkup
+		picBtns       *tb.ReplyMarkup
+		textBtns      *tb.ReplyMarkup
+		atbashBtns    *tb.ReplyMarkup
+		atbashBtns2   *tb.InlineKeyboardMarkup
 	}
 }
 

@@ -29,8 +29,8 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 		"\n• Шифр Атбаш" +
 		"\n" +
 		"\n<b>Разное:</b>" +
-		"\n• Склейка фото, если прислать или переслать альбом." +
-		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot (переслать)."
+		"\n• Склейка, сжатие фото." +
+		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot."
 
 	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true}, tb.ModeHTML)
 	return
