@@ -10,7 +10,6 @@ import (
 	"math/rand"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -48,8 +47,6 @@ type Other struct {
 	YetAnotherBotInfoUserRGX *regexp.Regexp
 	AtbashAlphabet           *strings.Replacer
 	AtbashCache              *lru.Cache
-	SeamCarvingMutex         sync.Mutex
-	SeamCarvingMutexBL       bool
 }
 
 func (s Service) Start() {

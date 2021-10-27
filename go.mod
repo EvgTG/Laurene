@@ -12,8 +12,6 @@ require (
 )
 
 require (
-	github.com/disintegration/gift v1.2.1 // indirect
-	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
