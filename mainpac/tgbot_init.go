@@ -4,6 +4,7 @@ import (
 	"Laurene/util"
 	lru "github.com/hashicorp/golang-lru"
 	tb "gopkg.in/tucnak/telebot.v3"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -90,6 +91,9 @@ func (s *Service) TgSome(x tb.Context) (errReturn error) {
 
 func (s *Service) InitOther() {
 	var err error
+	dir := "files/temp/"
+	os.RemoveAll(dir)
+	os.Mkdir(dir, 777)
 
 	// YetAnotherBot RGX
 	s.Other.YetAnotherBotInfoUserRGX, err = regexp.Compile("^\\[BOT\\] Информация о .{1,2} #.+:\\n")
