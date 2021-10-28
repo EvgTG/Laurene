@@ -14,10 +14,6 @@ func main() {
 
 /*
 TODO:
-Текст:
-Фото: шакал, искажения
-Счетчики
-Генератор случайных чисел
 Стата чатов, уведомлений етеназе
 
 $env:GOOS = 'linux'; $env:GOARCH = 'arm64'; $env:CGO_ENABLED = '0'; go build -o lrn .
