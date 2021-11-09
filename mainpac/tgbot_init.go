@@ -16,9 +16,11 @@ func (s *Service) InitTBot() {
 
 	s.TG.Bot.Handle("/start", s.TgStartCMD)
 	s.TG.Bot.Handle("/help", s.TgStartCMD)
+	s.TG.Bot.Handle("/YABNotification", s.TgYABNotification)
 	s.TG.Bot.Handle(tb.OnPhoto, s.TgPic)
 	s.TG.Bot.Handle(tb.OnText, s.TgOnText)
 	s.TG.Bot.Handle(tb.OnQuery, s.TgOnTextInline)
+	s.TG.Bot.Handle(tb.OnDocument, s.TgStatYABNotif)
 
 	// Админские команды
 
@@ -96,8 +98,18 @@ func (s *Service) InitOther() {
 	os.Mkdir(dir, 777)
 
 	// YetAnotherBot RGX
-	s.Other.YetAnotherBotInfoUserRGX, err = regexp.Compile("^\\[BOT\\] Информация о .{1,2} #.+:\\n")
-	util.ErrCheckFatal(err, "InitRgxs", "YetAnotherBotInfoUserRGX")
+	s.Other.YABInfoUserRGX, err = regexp.Compile("^\\[BOT\\] Информация о .{1,2} #.+:\\n")
+	util.ErrCheckFatal(err, "InitRgxs", "YABInfoUserRGX")
+
+	// YetAnotherBot RGX Notif
+	s.Other.YABNotifMsg, err = regexp.Compile("^\\[BOT\\] Тебе отправлено личное сообщение от")
+	util.ErrCheckFatal(err, "InitRgxs", "YABNotifMsg")
+	s.Other.YABNotifReply, err = regexp.Compile("^\\[BOT\\] Ответ от")
+	util.ErrCheckFatal(err, "InitRgxs", "YABNotifReply")
+	s.Other.YABNotifSlap, err = regexp.Compile("^\\[BOT\\] Шлепок от")
+	util.ErrCheckFatal(err, "InitRgxs", "YABNotifSlap")
+	s.Other.YABNotifHug, err = regexp.Compile("^\\[BOT\\] Обнимашка от")
+	util.ErrCheckFatal(err, "InitRgxs", "YABNotifHug")
 
 	// Atbash Cache
 	s.Other.AtbashCache, _ = lru.New(1000)

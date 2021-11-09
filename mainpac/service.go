@@ -44,9 +44,15 @@ type TG struct {
 }
 
 type Other struct {
-	YetAnotherBotInfoUserRGX *regexp.Regexp
-	AtbashAlphabet           *strings.Replacer
-	AtbashCache              *lru.Cache
+	YABInfoUserRGX *regexp.Regexp
+
+	YABNotifMsg   *regexp.Regexp
+	YABNotifReply *regexp.Regexp
+	YABNotifSlap  *regexp.Regexp
+	YABNotifHug   *regexp.Regexp
+
+	AtbashAlphabet *strings.Replacer
+	AtbashCache    *lru.Cache
 }
 
 func (s Service) Start() {

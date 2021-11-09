@@ -30,6 +30,7 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 		"\n" +
 		"\n<b>Разное:</b>" +
 		"\n• Склейка, сжатие фото." +
+		"\n• Статистика уведомлений @YetAnotherBot\n  (инструкция тут /YABNotification)" +
 		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot."
 
 	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true}, tb.ModeHTML)
@@ -38,7 +39,7 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 
 func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 	switch {
-	case s.Other.YetAnotherBotInfoUserRGX.MatchString(x.Text()):
+	case s.Other.YABInfoUserRGX.MatchString(x.Text()):
 		s.TgInfoUserYAB(x)
 		return
 	default:
@@ -58,6 +59,22 @@ func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 	case "test":
 
 	}
+	return
+}
+
+func (s *Service) TgYABNotification(x tb.Context) (errReturn error) {
+	text := "" +
+		"В статистике получите количество ответов/обнимашек/шлепков/сообщений всего, топ 10 по каждой категории из списка чатлан. " +
+		"\n\nСтоить учитывать что статистика включает в себя именно уведомления, а не реальные действия в чате. " +
+		"Всё зависит от выставленных настроек времени активности. Но уведомления о шлепках и обнимашках работают всегда." +
+		"\nДанные не собираются :)" +
+		"\n\nПонадобиться пк версия телеграма." +
+		"\n1. Переходим в @YetAnotherNotificationBot" +
+		"\n2. 3 точки -> \"Экспорт истории чата\"" +
+		"\n3. Формат \"Машиночитаемый JSON\", даты произвольные, но не раньше 11 февраля 2019" +
+		"\n4. После экспорта кинуть полученный файл \"result.json\" сюда."
+
+	x.Send(text)
 	return
 }
 
