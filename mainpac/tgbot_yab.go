@@ -180,7 +180,7 @@ func (s *Service) TgStatYABNotif(x tb.Context) (errReturn error) {
 		for i, u := range stat.TopFinal[key] {
 			text += fmt.Sprintf("%v. %v %v %v\n", i+1, u.number, u.id, u.nicks)
 		}
-		x.Send(text)
+		x.Send(text, &tb.SendOptions{DisableNotification: true})
 	}
 	return
 }
