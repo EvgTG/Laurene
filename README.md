@@ -1,5 +1,7 @@
 # LaureneAssistantBot
 
+Помощник с различными возможностями (текст, фото, всякое).
+
 ### Docker
 `docker build -t laurenebot .`  
 `docker run -d -v /path/files/:/app/files/ --net=host --name lrn laurenebot`
@@ -10,7 +12,7 @@
 * NAMEDB* (Database name)
 * MONGOURL* (Ссылка для подключения mongodb)
 * TOKENTG* (telegram bot api token)
-* USERLIST,ADMINLIST*,NOTIFYLIST*,ERRORLIST* (user IDs - "id,id,id")
+* USERLIST*,ADMINLIST*,NOTIFYLIST*,ERRORLIST* (user IDs - "id,id,id")
 * LOC (локация для времени, смотреть tzdata)
 * PINGPORT (Порт для проверки работоспособности бота, например UptimeRobot. Пример ссылки по которой будет доступ - "http://[ip]:6975/pingLaurene", отсутствие PINGPORT - сервер для пинга не запуститься.)
 
