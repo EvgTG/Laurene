@@ -16,6 +16,7 @@ func (s *Service) InitTBot() {
 
 	s.TG.Bot.Handle("/start", s.TgStartCMD)
 	s.TG.Bot.Handle("/help", s.TgStartCMD)
+	s.TG.Bot.Handle("/yab", s.TgStartYAB)
 	s.TG.Bot.Handle("/YABNotification", s.TgYABNotification)
 	s.TG.Bot.Handle(tb.OnPhoto, s.TgPic)
 	s.TG.Bot.Handle(tb.OnText, s.TgOnText)

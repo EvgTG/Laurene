@@ -29,8 +29,15 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 		"\n• Шифр Атбаш" +
 		"\n" +
 		"\n<b>Разное:</b>" +
-		"\n• Склейка, сжатие фото." +
-		"\n• Статистика уведомлений @YetAnotherBot\n  (инструкция тут /YABNotification)" +
+		"\n• Склейка, сжатие фото."
+
+	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true}, tb.ModeHTML)
+	return
+}
+
+func (s *Service) TgStartYAB(x tb.Context) (errReturn error) {
+	text := "" +
+		"• Статистика уведомлений @YetAnotherBot\n  (инструкция тут /YABNotification)" +
 		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot."
 
 	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true}, tb.ModeHTML)
