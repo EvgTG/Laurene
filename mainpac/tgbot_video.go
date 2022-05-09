@@ -50,7 +50,7 @@ func (s *Service) TgVideoComb(x tb.Context) (errReturn error) {
 		s.TG.VideoAlbumsManager.Mutex.Unlock()
 	}()
 
-	sort.Slice(va.Videos, func(i, j int) bool { return va.Videos[i].Unixtime < va.Videos[j].Unixtime })
+	sort.Slice(va.Videos, func(i, j int) bool { return va.Videos[i].ID < va.Videos[j].ID })
 	album := tb.Album{}
 	for _, videoMes := range va.Videos {
 		album = append(album, videoMes.Video)
