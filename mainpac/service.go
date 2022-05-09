@@ -32,7 +32,8 @@ type TG struct {
 	Buttons       map[string]*tb.Btn
 	CallbackQuery map[int64]string //контекстный ввод
 
-	AlbumsManager *util.AlbumsManager
+	AlbumsManager      *util.AlbumsManager
+	VideoAlbumsManager *VideoAlbumsManager
 
 	menu struct {
 		picAlbumsBtns *tb.ReplyMarkup

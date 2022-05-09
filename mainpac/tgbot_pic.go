@@ -37,7 +37,7 @@ func (s *Service) TgPic(x tb.Context) (errReturn error) {
 		"Что сделать с фотографиями?" +
 		"\n" +
 		"\n1. Объединить" +
-		"\n2. Сжать"
+		"\n2. Сжать (лишь ради смеха)"
 	x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.picAlbumsBtns)
 	return
 }

@@ -12,6 +12,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v3"
 	"math/rand"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -110,6 +111,11 @@ func NewService(cfg *initConfig /*, db *model.Model*/) *mainpac.Service {
 			Uptime:        time.Now(),
 			CallbackQuery: make(map[int64]string),
 			AlbumsManager: util.NewAlbumsManager(),
+			VideoAlbumsManager: &mainpac.VideoAlbumsManager{
+				Map:     make(map[int64]*mainpac.VideoAlbum),
+				MapLock: make(map[int64]bool),
+				Mutex:   sync.Mutex{},
+			},
 		},
 		DB:   nil,
 		Loc:  cfg.Loc,

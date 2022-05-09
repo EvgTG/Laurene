@@ -22,6 +22,7 @@ func (s *Service) InitTBot() {
 	s.TG.Bot.Handle(tb.OnText, s.TgOnText)
 	s.TG.Bot.Handle(tb.OnQuery, s.TgOnTextInline)
 	s.TG.Bot.Handle(tb.OnDocument, s.TgStatYABNotif)
+	s.TG.Bot.Handle(tb.OnVideo, s.TgVideoComb)
 
 	// Админские команды
 
