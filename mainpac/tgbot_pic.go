@@ -385,6 +385,7 @@ func (s *Service) TgPicGif(x tb.Context) (errReturn error) {
 		return
 	}
 	defer x.Bot().Delete(mes)
+	defer x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
 
 	dir := "files/temp/" + util.CreateKey(5) + "/"
 	os.Mkdir(dir, fs.ModePerm)
@@ -415,7 +416,7 @@ func (s *Service) TgPicGif(x tb.Context) (errReturn error) {
 	img = resize.Resize(uint(img.Bounds().Max.X/2), uint(img.Bounds().Max.Y/2), img, resize.Bilinear)
 
 	files := make([]string, 0, 20)
-	quality := 30
+	quality := 25
 	for quality >= 1 {
 		name := dir + util.CreateKey(5) + ".jpg"
 		files = append(files, name)
