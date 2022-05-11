@@ -107,6 +107,10 @@ func (s *Service) TgStatYABNotif(x tb.Context) (errReturn error) {
 		x.Send("Слишком большой размер файла (больше 50мб).")
 		return
 	}
+	if doc.MIME != "application/json" {
+		x.Send("Этот тип файлов не принимается")
+		return
+	}
 
 	path := "files/temp/" + util.CreateKey(10) + ".json"
 	defer os.Remove(path)

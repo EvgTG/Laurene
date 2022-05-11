@@ -4,6 +4,7 @@ import (
 	"Laurene/util"
 	lru "github.com/hashicorp/golang-lru"
 	tb "gopkg.in/tucnak/telebot.v3"
+	"io/fs"
 	"os"
 	"regexp"
 	"strings"
@@ -49,6 +50,7 @@ func (s *Service) InitTBot() {
 	s.TG.addBtn(rm.Data("1️⃣\U0001F7E9", "pic_compress1", "cp1"), "pic_compress1", s.TgCompress)
 	s.TG.addBtn(rm.Data("1️⃣\U0001F7E8", "pic_compress2", "cp2"), "pic_compress2", s.TgCompress)
 	s.TG.addBtn(rm.Data("1️⃣\U0001F7E5", "pic_compress3", "cp3"), "pic_compress3", s.TgCompress)
+	s.TG.addBtn(rm.Data("2️⃣▶️", "pic_gif", "pic_gif"), "pic_gif", s.TgPicGif)
 	s.TG.addBtn(rm.Data("🖼 Отправить картинкой", "picfile_to_pic"), "picfile_to_pic", s.TgFilePicToPic)
 	s.TG.addBtn(rm.Data("1️⃣", "text_reverse", "1"), "text_reverse", s.TgTextReverse)
 	s.TG.addBtn(rm.Data("2️⃣", "text_toupper", "2"), "text_toupper", s.TgTextToUpper)
@@ -63,7 +65,7 @@ func (s *Service) InitTBot() {
 		[]tb.Btn{*s.TG.Buttons["album_compress1"], *s.TG.Buttons["album_compress2"], *s.TG.Buttons["album_compress3"]},
 	)
 	s.TG.menu.picBtns = &tb.ReplyMarkup{}
-	s.TG.menu.picBtns.Inline([]tb.Btn{*s.TG.Buttons["pic_compress1"], *s.TG.Buttons["pic_compress2"], *s.TG.Buttons["pic_compress3"]})
+	s.TG.menu.picBtns.Inline([]tb.Btn{*s.TG.Buttons["pic_compress1"], *s.TG.Buttons["pic_compress2"], *s.TG.Buttons["pic_compress3"], *s.TG.Buttons["pic_gif"]})
 
 	s.TG.menu.textBtns = &tb.ReplyMarkup{}
 	s.TG.menu.textBtns.Inline([]tb.Btn{*s.TG.Buttons["text_reverse"], *s.TG.Buttons["text_toupper"], *s.TG.Buttons["text_random"], *s.TG.Buttons["text_atbash"]})
@@ -97,7 +99,7 @@ func (s *Service) InitOther() {
 	var err error
 	dir := "files/temp/"
 	os.RemoveAll(dir)
-	os.Mkdir(dir, 777)
+	os.Mkdir(dir, fs.ModePerm)
 
 	// YetAnotherBot RGX
 	s.Other.YABInfoUserRGX, err = regexp.Compile("^\\[BOT\\] Информация о .{1,2} #.+:\\n")

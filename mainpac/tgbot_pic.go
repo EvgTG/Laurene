@@ -4,10 +4,12 @@ import (
 	"Laurene/go-log"
 	"Laurene/util"
 	"bytes"
+	"github.com/nfnt/resize"
 	"github.com/pkg/errors"
 	"golang.org/x/image/draw"
 	tb "gopkg.in/tucnak/telebot.v3"
 	"image"
+	"image/gif"
 	"image/jpeg"
 	"io/fs"
 	"io/ioutil"
@@ -28,7 +30,8 @@ func (s *Service) TgPic(x tb.Context) (errReturn error) {
 		text := "" +
 			"Что сделать с фотографиями?" +
 			"\n" +
-			"\n1. Сжать"
+			"\n1. Сжать" +
+			"\n2. gif с постепенным сжатием"
 		x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.picBtns)
 		return
 	}
@@ -46,6 +49,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 	if x.Message() == nil || x.Message().ReplyTo == nil {
 		return
 	}
+	defer x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
 
 	albumID := x.Message().ReplyTo.AlbumID
 	if albumID == "" {
@@ -69,7 +73,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 	pathes := make([]string, 0, len(photosMes))
 	images := make([]image.Image, 0, len(photosMes))
 	dir := "files/temp/" + util.CreateKey(5) + "/"
-	os.Mkdir(dir, 777)
+	os.Mkdir(dir, fs.ModePerm)
 	defer os.RemoveAll(dir)
 	for _, mes := range photosMes {
 		photo := mes.Photo
@@ -232,7 +236,6 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		return
 	}
 	x.Respond()
-	x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, c.Data)})
 	return
 }
 
@@ -268,6 +271,7 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 	if x.Message() == nil || x.Message().ReplyTo == nil {
 		return
 	}
+	defer x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
 
 	var quality int = 10
 	switch x.Callback().Data {
@@ -302,11 +306,11 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 	newpathes := make([]string, 0, len(photosMes))
 	images := make([]image.Image, 0, len(photosMes))
 	dir := "files/temp/" + util.CreateKey(5) + "/"
-	os.Mkdir(dir, 777)
+	os.Mkdir(dir, fs.ModePerm)
 	defer os.RemoveAll(dir)
 	for _, mes := range photosMes {
 		photo := mes.Photo
-		path := dir + photo.FileID + ".jpg"
+		path := dir + util.CreateKey(12) + ".jpg"
 		newpath := dir + util.CreateKey(12) + ".jpg"
 		pathes = append(pathes, path)
 		newpathes = append(newpathes, newpath)
@@ -356,7 +360,6 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 		return
 	}
 	x.Respond()
-	x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
 	return
 }
 
@@ -370,4 +373,157 @@ func imgCompress(img image.Image, out string, quality int) error {
 		return err
 	}
 	return ioutil.WriteFile(out, buf.Bytes(), fs.ModePerm)
+}
+
+func (s *Service) TgPicGif(x tb.Context) (errReturn error) {
+	if x.Message() == nil || x.Message().ReplyTo == nil {
+		return
+	}
+
+	mes, err := x.Bot().Send(x.Sender(), "Обработка...")
+	if err != nil {
+		return
+	}
+	defer x.Bot().Delete(mes)
+
+	dir := "files/temp/" + util.CreateKey(5) + "/"
+	os.Mkdir(dir, fs.ModePerm)
+	defer os.RemoveAll(dir)
+	pathPic := dir + util.CreateKey(5) + ".jpg"
+
+	err = x.Bot().Download(x.Message().ReplyTo.Photo.MediaFile(), pathPic)
+	if err != nil {
+		log.Error(errors.Wrap(err, "TgPicGif Bot.Download"))
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		return
+	}
+
+	file, err := os.Open(pathPic)
+	if err != nil {
+		log.Error(errors.Wrap(err, "TgPicGif os.Open"))
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		return
+	}
+	defer file.Close()
+	img, err := jpeg.Decode(file)
+	if err != nil {
+		log.Error(errors.Wrap(err, "TgPicGif jpeg.Decode"))
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		return
+	}
+
+	img = resize.Resize(uint(img.Bounds().Max.X/2), uint(img.Bounds().Max.Y/2), img, resize.Bilinear)
+
+	files := make([]string, 0, 20)
+	quality := 30
+	for quality >= 1 {
+		name := dir + util.CreateKey(5) + ".jpg"
+		files = append(files, name)
+		err = imgCompress(img, name, quality)
+		if err != nil {
+			log.Error(errors.Wrap(err, "TgPicGif imgCompress"))
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+			return
+		}
+
+		quality -= 1
+	}
+
+	nameGif := dir + "outgif.gif"
+	err = genGif(files, 30, nameGif)
+	if err != nil {
+		log.Error(errors.Wrap(err, "TgPicGif genGif"))
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		return
+	}
+
+	x.Send(&tb.Document{File: tb.FromDisk(nameGif), FileName: "file.gif"})
+	x.Respond()
+	return
+}
+
+func genGif(files []string, delay int, nameOut string) error {
+	var frames []*image.Paletted
+	var dx = []int{}
+	var dy = []int{}
+	var newTempImg image.Image
+
+	for i := range files {
+		file, err := os.Open(files[i])
+		if err != nil {
+			return errors.Wrap(err, "os.Open")
+		}
+		defer file.Close()
+		img, err := jpeg.Decode(file)
+		if err != nil {
+			return errors.Wrap(err, "jpeg.Decode1")
+		}
+
+		buf := bytes.Buffer{}
+		err = gif.Encode(&buf, img, nil)
+		if err != nil {
+			return errors.Wrap(err, "gif.Encode1")
+		}
+
+		tmpimg, err := gif.Decode(&buf)
+		if err != nil {
+			return errors.Wrap(err, "gif.Decode1")
+		}
+
+		r := tmpimg.Bounds()
+
+		var newX, newY int
+		if len(dx) > 0 {
+			if dx[i-1] != r.Dx() {
+				newX = dx[i-1]
+			}
+		}
+
+		if len(dy) > 0 {
+			if dy[i-1] != r.Dy() {
+				newY = dy[i-1]
+			}
+		}
+
+		if newX > 0 || newY > 0 {
+			newTempImg = resize.Resize(uint(newX), uint(newY), tmpimg, resize.Lanczos3)
+		}
+
+		dx = append(dx, r.Dx())
+		dy = append(dy, r.Dy())
+
+		if newTempImg != nil {
+			err = gif.Encode(&buf, newTempImg, nil)
+			if err != nil {
+				return errors.Wrap(err, "gif.Encode2")
+			}
+
+			tempImg, err := gif.Decode(&buf)
+			if err != nil {
+				return errors.Wrap(err, "gif.Decode2")
+			}
+
+			frames = append(frames, tempImg.(*image.Paletted))
+		} else {
+			frames = append(frames, tmpimg.(*image.Paletted))
+		}
+
+	}
+
+	delays := make([]int, len(frames))
+	for j := range delays {
+		delays[j] = delay
+	}
+
+	f, err := os.OpenFile(nameOut, os.O_WRONLY|os.O_CREATE, fs.ModePerm)
+	if err != nil {
+		errors.Wrap(err, "os.OpenFile")
+	}
+	defer f.Close()
+	err = gif.EncodeAll(f, &gif.GIF{Image: frames, Delay: delays, LoopCount: 0})
+	if err != nil {
+		return errors.Wrap(err, "gif.EncodeAll")
+	}
+
+	return nil
 }
