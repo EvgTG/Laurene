@@ -1,7 +1,5 @@
 # LaureneAssistantBot
-
 Помощник с различными возможностями (текст, фото, всякое).
-
 ### Docker
 ```
 docker build -t laurenebot .  
