@@ -19,6 +19,7 @@ func (s *Service) InitTBot() {
 	s.TG.Bot.Handle("/help", s.TgStartCMD)
 	s.TG.Bot.Handle("/yab", s.TgStartYAB)
 	s.TG.Bot.Handle("/YABNotification", s.TgYABNotification)
+	s.TG.Bot.Handle("/emoji", s.TgEmojiAlphabet)
 	s.TG.Bot.Handle(tb.OnPhoto, s.TgPic)
 	s.TG.Bot.Handle(tb.OnText, s.TgOnText)
 	s.TG.Bot.Handle(tb.OnQuery, s.TgOnTextInline)
@@ -56,6 +57,7 @@ func (s *Service) InitTBot() {
 	s.TG.addBtn(rm.Data("2️⃣", "text_toupper", "2"), "text_toupper", s.TgTextToUpper)
 	s.TG.addBtn(rm.Data("3️⃣", "text_random", "3"), "text_random", s.TgTextRandom)
 	s.TG.addBtn(rm.Data("4️⃣", "text_atbash", "4"), "text_atbash", s.TgTextAtbash)
+	s.TG.addBtn(rm.Data("5️⃣", "text_emoji", "5"), "text_emoji", s.TgTextEmoji)
 	s.TG.addBtn(rm.Data("Расшифровать", "atbash_btn"), "atbash_btn", s.TgTextAtbashBtn)
 	s.TG.addBtn(iq, "iq", s.TgTest)
 
@@ -68,7 +70,7 @@ func (s *Service) InitTBot() {
 	s.TG.menu.picBtns.Inline([]tb.Btn{*s.TG.Buttons["pic_compress1"], *s.TG.Buttons["pic_compress2"], *s.TG.Buttons["pic_compress3"], *s.TG.Buttons["pic_gif"]})
 
 	s.TG.menu.textBtns = &tb.ReplyMarkup{}
-	s.TG.menu.textBtns.Inline([]tb.Btn{*s.TG.Buttons["text_reverse"], *s.TG.Buttons["text_toupper"], *s.TG.Buttons["text_random"], *s.TG.Buttons["text_atbash"]})
+	s.TG.menu.textBtns.Inline([]tb.Btn{*s.TG.Buttons["text_reverse"], *s.TG.Buttons["text_toupper"], *s.TG.Buttons["text_random"], *s.TG.Buttons["text_atbash"], *s.TG.Buttons["text_emoji"]})
 
 	s.TG.menu.atbashBtns = &tb.ReplyMarkup{}
 	s.TG.menu.atbashBtns.Inline([]tb.Btn{*s.TG.Buttons["atbash_btn"]}, []tb.Btn{*s.TG.Buttons["iq"]})

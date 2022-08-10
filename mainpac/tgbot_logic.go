@@ -27,6 +27,7 @@ func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
 		"\n• Текст в верхнем регистре" +
 		"\n• Текст в случайном регистре" +
 		"\n• Шифр Атбаш" +
+		"\n• Текст в эмоджи по первым буквам (алфавит - /emoji)" +
 		"\n" +
 		"\n<b>Разное:</b>" +
 		"\n• Склейка, сжатие фото" +
@@ -57,7 +58,8 @@ func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 			"\n1. Обратный порядок" +
 			"\n2. В верхнем регистре" +
 			"\n3. В случайном регистре" +
-			"\n4. Шифр Атбаш"
+			"\n4. Шифр Атбаш" +
+			"\n5. В эмоджи по первым буквам"
 
 		x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.textBtns)
 	}
@@ -114,6 +116,12 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 	rm := *s.TG.menu.atbashBtns2
 	rm.InlineKeyboard[0][0].Data = key
 	ar.ReplyMarkup = &rm
+	res = append(res, ar)
+
+	// Текст в переводе на эмоджи
+	text = textEmoji(q.Text)
+	ar = &tb.ArticleResult{Title: "Эмоджи по первым буквам", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar.ParseMode = tb.ModeHTML
 	res = append(res, ar)
 
 	// Текст в верхнем регистре
