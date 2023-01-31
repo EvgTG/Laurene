@@ -9,7 +9,7 @@ import (
 	"Laurene/util"
 	"fmt"
 	"go.uber.org/fx"
-	tb "gopkg.in/tucnak/telebot.v3"
+	tb "gopkg.in/telebot.v3"
 	"math/rand"
 	"net/http"
 	"sync"

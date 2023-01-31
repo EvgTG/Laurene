@@ -5,7 +5,7 @@ import (
 	"Laurene/util"
 	"fmt"
 	"github.com/pkg/errors"
-	tb "gopkg.in/tucnak/telebot.v3"
+	tb "gopkg.in/telebot.v3"
 	"os"
 	"strconv"
 	"strings"

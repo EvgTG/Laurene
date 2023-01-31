@@ -7,7 +7,7 @@ import (
 	"github.com/nfnt/resize"
 	"github.com/pkg/errors"
 	"golang.org/x/image/draw"
-	tb "gopkg.in/tucnak/telebot.v3"
+	tb "gopkg.in/telebot.v3"
 	"image"
 	"image/gif"
 	"image/jpeg"

@@ -6,7 +6,7 @@ import (
 	"Laurene/util"
 	"fmt"
 	lru "github.com/hashicorp/golang-lru"
-	tb "gopkg.in/tucnak/telebot.v3"
+	tb "gopkg.in/telebot.v3"
 	"math/rand"
 	"regexp"
 	"strings"

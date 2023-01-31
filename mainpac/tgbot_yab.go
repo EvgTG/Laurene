@@ -4,7 +4,7 @@ import (
 	ue "Laurene/unmarshal_export"
 	"Laurene/util"
 	"fmt"
-	tb "gopkg.in/tucnak/telebot.v3"
+	tb "gopkg.in/telebot.v3"
 	"math"
 	"os"
 	"sort"

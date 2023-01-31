@@ -3,7 +3,7 @@ package mainpac
 import (
 	"Laurene/util"
 	lru "github.com/hashicorp/golang-lru"
-	tb "gopkg.in/tucnak/telebot.v3"
+	tb "gopkg.in/telebot.v3"
 	"io/fs"
 	"os"
 	"regexp"
