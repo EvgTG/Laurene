@@ -10,7 +10,7 @@ import (
 func (s *Service) TgTextReverse(x tb.Context) (errReturn error) {
 	defer x.Respond()
 	if x.Message().ReplyTo == nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "err"), ShowAlert: true})
 		return
 	}
 
@@ -29,7 +29,7 @@ func textReverse(s string) (res string) {
 func (s *Service) TgTextToUpper(x tb.Context) (errReturn error) {
 	defer x.Respond()
 	if x.Message().ReplyTo == nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "err"), ShowAlert: true})
 		return
 	}
 
@@ -42,7 +42,7 @@ func (s *Service) TgTextToUpper(x tb.Context) (errReturn error) {
 func (s *Service) TgTextRandom(x tb.Context) (errReturn error) {
 	defer x.Respond()
 	if x.Message().ReplyTo == nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "err"), ShowAlert: true})
 		return
 	}
 
@@ -84,7 +84,7 @@ func (s *Service) TgEmojiAlphabet(x tb.Context) (errReturn error) {
 func (s *Service) TgTextEmoji(x tb.Context) (errReturn error) {
 	defer x.Respond()
 	if x.Message().ReplyTo == nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "err"), ShowAlert: true})
 		return
 	}
 
@@ -126,14 +126,14 @@ func textEmoji(s string) (res string) {
 func (s *Service) TgTextAtbash(x tb.Context) (errReturn error) {
 	defer x.Respond()
 	if x.Message().ReplyTo == nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "err"), ShowAlert: true})
 		return
 	}
 
 	text := s.Other.AtbashAlphabet.Replace(x.Message().ReplyTo.Text)
 	key := util.CreateKey(8)
 	s.Other.AtbashCache.Add(key, x.Message().ReplyTo.Text)
-	rm := *s.TG.menu.atbashBtns
+	rm := *s.Bot.Markup(x, "atbash")
 	rm.InlineKeyboard[0][0].Data = key
 
 	x.Send("<pre>"+text+"</pre>", &rm, tb.ModeHTML)
@@ -143,14 +143,14 @@ func (s *Service) TgTextAtbash(x tb.Context) (errReturn error) {
 
 func (s *Service) TgTextAtbashBtn(x tb.Context) (errReturn error) {
 	if x.Data() == "" {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "err"), ShowAlert: true})
 		return
 	}
 
 	key := x.Data()
 	text, ok := s.Other.AtbashCache.Get(key)
 	if !ok {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Сообщение слишком старое. Перешли его в бота, чтобы расшифровать.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "atbash_old"), ShowAlert: true})
 		return
 	}
 

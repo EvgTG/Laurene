@@ -1,0 +1,113 @@
+settings:
+  offline: false
+commands:
+  /help: Список возможностей
+# /start: '{{ text "cmd_start" }}' //cmd_start in locales/
+buttons:
+  test:
+    unique: test
+    text: Test
+  delete:
+    unique: delete
+    text: 🗑Удалить
+  cancel:
+    text: ❌Отмена
+  status_update:
+    unique: status_update
+    text: 🔄Обновить
+  get_logs:
+    unique: get_logs
+    text: 1
+  clear_logs:
+    unique: clear_logs
+    text: 2
+  album_to_pic_down:
+    unique: album_to_pic_down
+    callback_data: down
+    text: 1️⃣ вниз
+  album_to_pic_right:
+    unique: album_to_pic_right
+    callback_data: right
+    text: 1️⃣ вправо
+  album_to_pic_mesh:
+    unique: album_to_pic_mesh
+    callback_data: mesh
+    text: 1️⃣ сеткой
+  album_compress1:
+    unique: album_compress1
+    callback_data: cp1
+    text: 2️⃣
+  album_compress2:
+    unique: album_compress2
+    callback_data: cp2
+    text: 2️⃣
+  album_compress3:
+    unique: album_compress3
+    callback_data: cp3
+    text: 2️⃣
+  pic_compress1:
+    unique: pic_compress1
+    callback_data: cp1
+    text: 1️⃣
+  pic_compress2:
+    unique: pic_compress2
+    callback_data: cp2
+    text: 1️⃣
+  pic_compress3:
+    unique: pic_compress3
+    callback_data: cp3
+    text: 1️⃣
+  pic_gif:
+    unique: pic_gif
+    callback_data: pic_gif
+    text: 2️⃣▶️
+  picfile_to_pic:
+    unique: picfile_to_pic
+    text: 🖼 Отправить картинкой
+  text_reverse:
+    unique: text_reverse
+    callback_data: 1
+    text: 1️⃣
+  text_toupper:
+    unique: text_toupper
+    callback_data: 2
+    text: 2️⃣
+  text_random:
+    unique: text_random
+    callback_data: 3
+    text: 3️⃣
+  text_atbash:
+    unique: text_atbash
+    callback_data: 4
+    text: 4️⃣
+  text_emoji:
+    unique: text_emoji
+    callback_data: 5
+    text: 5️⃣
+  atbash_btn:
+    unique: atbash_btn
+    text: Расшифровать
+  iq:
+    text: Написать
+    switch_inline_query_current_chat: " "
+markups:
+  remove_keyboard:
+    remove_keyboard: true
+  test:
+    - [ test ]
+  logs:
+    - [ get_logs, clear_logs ]
+  status:
+    - [ status_update ]
+  pic_album:
+    - [ album_to_pic_down, album_to_pic_right, album_to_pic_mesh ]
+    - [ album_compress1, album_compress2, album_compress3 ]
+  pic:
+    - [ pic_compress1, pic_compress2, pic_compress3, pic_gif ]
+  picfile_to_pic:
+    - [ picfile_to_pic ]
+  text:
+    - [ text_reverse, text_toupper, text_random, text_atbash, text_emoji ]
+  atbash:
+    - [ atbash_btn ]
+    - [ iq ]

@@ -12,7 +12,6 @@ import (
 	"image/gif"
 	"image/jpeg"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"sort"
 	"time"
@@ -20,28 +19,18 @@ import (
 
 func (s *Service) TgPic(x tb.Context) (errReturn error) {
 	if x.Message().AlbumID != "" {
-		if s.TG.AlbumsManager.AddPhotoMes(x.Message().AlbumID, x.Message()) {
+		if s.Bot.AlbumsManager.AddPhotoMes(x.Message().AlbumID, x.Message()) {
 			return
 		}
 		time.Sleep(time.Millisecond * 500)
 	}
 
 	if x.Message().AlbumID == "" {
-		text := "" +
-			"Что сделать с фотографиями?" +
-			"\n" +
-			"\n1. Сжать" +
-			"\n2. gif с постепенным сжатием"
-		x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.picBtns)
+		x.Send(s.Bot.Text(x, "pic"), &tb.SendOptions{ReplyTo: x.Message(), AllowWithoutReply: true}, s.Bot.Markup(x, "pic"))
 		return
 	}
 
-	text := "" +
-		"Что сделать с фотографиями?" +
-		"\n" +
-		"\n1. Объединить" +
-		"\n2. Сжать (лишь ради смеха)"
-	x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.picAlbumsBtns)
+	x.Send(s.Bot.Text(x, "pic_album"), &tb.SendOptions{ReplyTo: x.Message(), AllowWithoutReply: true}, s.Bot.Markup(x, "pic_album"))
 	return
 }
 
@@ -56,15 +45,15 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		return
 	}
 
-	okLock := s.TG.AlbumsManager.LockAlbum(albumID)
+	okLock := s.Bot.AlbumsManager.LockAlbum(albumID)
 	if !okLock {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Подождите пока другой запрос выполнится.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_lock"), ShowAlert: true})
 		return
 	}
-	defer s.TG.AlbumsManager.UnLockAlbum(albumID)
-	photosMes := s.TG.AlbumsManager.GetAlbum(albumID)
+	defer s.Bot.AlbumsManager.UnLockAlbum(albumID)
+	photosMes := s.Bot.AlbumsManager.GetAlbum(albumID)
 	if len(photosMes) == 0 {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Фото не найдены, попробуйте переслать их в этого в бота.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_len0"), ShowAlert: true})
 		return
 	}
 
@@ -82,7 +71,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		err := x.Bot().Download(photo.MediaFile(), path)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgAlbumToPic Bot.Download"))
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 			return
 		}
 	}
@@ -91,7 +80,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		imgFile, err := os.Open(path)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgAlbumToPic os.Open"))
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 			return
 		}
 		defer imgFile.Close()
@@ -99,7 +88,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		img, _, err := image.Decode(imgFile)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgAlbumToPic image.Decode"))
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 			return
 		}
 
@@ -206,7 +195,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 			draw.BiLinear.Scale(rgba, r, img, img.Bounds(), draw.Over, nil)
 		}
 	default:
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору."})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err")})
 		return
 	}
 
@@ -214,7 +203,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 	out, err := os.Create(outPath)
 	if err != nil {
 		log.Error(errors.Wrap(err, "TgAlbumToPic os.Create(outPath)"))
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
 	defer out.Close()
@@ -224,15 +213,13 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 	err = jpeg.Encode(out, rgba, &opt)
 	if err != nil {
 		log.Error(errors.Wrap(err, "TgAlbumToPic jpeg.Encode"))
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
 
-	rm := &tb.ReplyMarkup{}
-	rm.Inline([]tb.Btn{*s.TG.Buttons["picfile_to_pic"]})
-	err = x.Send(&tb.Document{File: tb.FromDisk(outPath), FileName: "pic.jpg", Caption: photosMes[0].Caption}, rm)
+	err = x.Send(&tb.Document{File: tb.FromDisk(outPath), FileName: "pic.jpg", Caption: photosMes[0].Caption}, s.Bot.Markup(x, "picfile_to_pic"))
 	if err != nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
 	x.Respond()
@@ -240,16 +227,12 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 }
 
 func (s *Service) TgFilePicToPic(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
-		return
-	}
-
 	if x.Message() == nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору."})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err")})
 		return
 	}
 	if x.Message().Document == nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору."})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err")})
 		return
 	}
 
@@ -257,7 +240,7 @@ func (s *Service) TgFilePicToPic(x tb.Context) (errReturn error) {
 	defer os.Remove(outPath)
 	err := x.Bot().Download(x.Message().Document.MediaFile(), outPath)
 	if err != nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору."})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err")})
 		return
 	}
 
@@ -288,15 +271,15 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 	if albumID == "" {
 		photosMes = []*tb.Message{x.Message().ReplyTo}
 	} else {
-		okLock := s.TG.AlbumsManager.LockAlbum(albumID)
+		okLock := s.Bot.AlbumsManager.LockAlbum(albumID)
 		if !okLock {
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Подождите пока другой запрос выполнится.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_lock"), ShowAlert: true})
 			return
 		}
-		defer s.TG.AlbumsManager.UnLockAlbum(albumID)
-		photosMes = s.TG.AlbumsManager.GetAlbum(albumID)
+		defer s.Bot.AlbumsManager.UnLockAlbum(albumID)
+		photosMes = s.Bot.AlbumsManager.GetAlbum(albumID)
 		if len(photosMes) == 0 {
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Фото не найдены, попробуйте переслать их в этого в бота.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_len0"), ShowAlert: true})
 			return
 		}
 		sort.Slice(photosMes, func(i, j int) bool { return photosMes[i].ID < photosMes[j].ID })
@@ -317,7 +300,7 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 		err := x.Bot().Download(photo.MediaFile(), path)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgCompress Bot.Download"))
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 			return
 		}
 	}
@@ -326,7 +309,7 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 		imgFile, err := os.Open(path)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgCompress os.Open"))
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 			return
 		}
 		defer imgFile.Close()
@@ -334,7 +317,7 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 		img, _, err := image.Decode(imgFile)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgCompress image.Decode"))
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 			return
 		}
 
@@ -345,7 +328,7 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 		err := imgCompress(img, newpathes[i], quality)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgCompress imgCompress"))
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 			return
 		}
 	}
@@ -356,7 +339,7 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 	}
 	err := x.SendAlbum(album)
 	if err != nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
 	x.Respond()
@@ -372,7 +355,7 @@ func imgCompress(img image.Image, out string, quality int) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(out, buf.Bytes(), fs.ModePerm)
+	return os.WriteFile(out, buf.Bytes(), fs.ModePerm)
 }
 
 func (s *Service) TgPicGif(x tb.Context) (errReturn error) {
@@ -395,21 +378,21 @@ func (s *Service) TgPicGif(x tb.Context) (errReturn error) {
 	err = x.Bot().Download(x.Message().ReplyTo.Photo.MediaFile(), pathPic)
 	if err != nil {
 		log.Error(errors.Wrap(err, "TgPicGif Bot.Download"))
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
 
 	file, err := os.Open(pathPic)
 	if err != nil {
 		log.Error(errors.Wrap(err, "TgPicGif os.Open"))
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
 	defer file.Close()
 	img, err := jpeg.Decode(file)
 	if err != nil {
 		log.Error(errors.Wrap(err, "TgPicGif jpeg.Decode"))
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
 
@@ -423,7 +406,7 @@ func (s *Service) TgPicGif(x tb.Context) (errReturn error) {
 		err = imgCompress(img, name, quality)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgPicGif imgCompress"))
-			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 			return
 		}
 
@@ -434,7 +417,7 @@ func (s *Service) TgPicGif(x tb.Context) (errReturn error) {
 	err = genGif(files, 30, nameGif)
 	if err != nil {
 		log.Error(errors.Wrap(err, "TgPicGif genGif"))
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Ошибка, напишите автору.", ShowAlert: true})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
 

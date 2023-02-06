@@ -8,21 +8,21 @@ import (
 	"time"
 )
 
-func (tg *TG) isAdmin(user *tb.User, chat int64) bool {
-	if chat >= 0 && util.IntInSlice(tg.AdminList, user.ID) {
-		return true
+func (Bot *Bot) isNotAdmin(x tb.Context) bool {
+	if x.Chat().ID >= 0 && util.IntInSlice(Bot.AdminList, x.Sender().ID) {
+		return false
 	}
-	return false
+	return true
 }
 
-func (tg *TG) sendToSlice(slice []int64, mesText string) {
+func (Bot *Bot) sendToSlice(slice []int64, mesText string) {
 	for _, chatID := range slice {
-		tg.Bot.Send(&tb.User{ID: chatID}, mesText, tb.ModeHTML)
+		Bot.Bot.Send(&tb.User{ID: chatID}, mesText, tb.ModeHTML)
 	}
 }
 
 // 4d7h6m34s
-func (tg *TG) uptimeString(timestamp time.Time) string {
+func (Bot *Bot) uptimeString(timestamp time.Time) string {
 	uptime := time.Since(timestamp).Round(time.Second)
 	hours, hoursStr := 0, ""
 	for uptime.Hours() > 24 {
@@ -33,11 +33,6 @@ func (tg *TG) uptimeString(timestamp time.Time) string {
 		hoursStr = fmt.Sprintf("%vd", hours)
 	}
 	return hoursStr + uptime.String()
-}
-
-func (tg *TG) addBtn(btn tb.Btn, key string, handler tb.HandlerFunc) {
-	tg.Buttons[key] = &btn
-	tg.Bot.Handle(&btn, handler)
 }
 
 func delBtn(rows [][]tb.InlineButton, copyData string) [][]tb.InlineButton {

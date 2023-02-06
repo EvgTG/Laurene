@@ -7,6 +7,7 @@ import (
 	"fmt"
 	lru "github.com/hashicorp/golang-lru"
 	tb "gopkg.in/telebot.v3"
+	"gopkg.in/telebot.v3/layout"
 	"math/rand"
 	"regexp"
 	"strings"
@@ -14,34 +15,41 @@ import (
 )
 
 type Service struct {
-	TG    *TG
+	Bot   *Bot
 	Other Other
-	DB    *model.Model
-	Loc   *time.Location
-	Rand  *rand.Rand
+
+	DB *model.Model
+
+	Loc  *time.Location
+	Rand *rand.Rand
 }
 
-type TG struct {
-	Bot           *tb.Bot
-	Username      string
-	UserList      []int64
-	AdminList     []int64
-	NotifyList    []int64
-	ErrorList     []int64
-	Uptime        time.Time
+type Bot struct {
+	*tb.Bot
+	*layout.Layout
+
+	UserList   []int64
+	AdminList  []int64
+	NotifyList []int64
+	ErrorList  []int64
+
+	Username string
+	Uptime   time.Time
+	Rand     *rand.Rand
+
 	Buttons       map[string]*tb.Btn
-	CallbackQuery map[int64]string //контекстный ввод
+	CallbackQuery map[int64]string // Контекстный ввод
 
 	AlbumsManager      *util.AlbumsManager
 	VideoAlbumsManager *VideoAlbumsManager
 
-	menu struct {
-		picAlbumsBtns *tb.ReplyMarkup
-		picBtns       *tb.ReplyMarkup
-		textBtns      *tb.ReplyMarkup
-		atbashBtns    *tb.ReplyMarkup
-		atbashBtns2   *tb.InlineKeyboardMarkup
-	}
+	//menu struct {
+	//	picAlbumsBtns *tb.ReplyMarkup
+	//	picBtns       *tb.ReplyMarkup
+	//	textBtns      *tb.ReplyMarkup
+	//	atbashBtns    *tb.ReplyMarkup
+	//	atbashBtns2   *tb.InlineKeyboardMarkup
+	//}
 }
 
 type Other struct {
@@ -60,22 +68,22 @@ func (s Service) Start() {
 	log.Info("tgbot init")
 	s.InitTBot()
 	log.Info("tgbot launch...")
-	fmt.Println("tgbot @" + s.TG.Bot.Me.Username)
+	fmt.Println("tgbot @" + s.Bot.Bot.Me.Username)
 	go s.GoCheckErrs()
-	s.TG.Bot.Start()
+	s.Bot.Bot.Start()
 }
 
 func (s Service) GoCheckErrs() {
 	time.Sleep(time.Second * 30)
 	nErr := log.GetErrN()
 	if nErr > 0 {
-		s.TG.sendToSlice(s.TG.ErrorList, fmt.Sprintf("Новых ошибок: %v.\n Заляните в логи.", nErr))
+		s.Bot.sendToSlice(s.Bot.ErrorList, fmt.Sprintf("Новых ошибок: %v.\n Заляните в логи.", nErr))
 	}
 
 	for range time.Tick(time.Minute * 5) {
 		nErr = log.GetErrN()
 		if nErr > 0 {
-			s.TG.sendToSlice(s.TG.ErrorList, fmt.Sprintf("Новых ошибок: %v.\n Заляните в логи.", nErr))
+			s.Bot.sendToSlice(s.Bot.ErrorList, fmt.Sprintf("Новых ошибок: %v.\n Заляните в логи.", nErr))
 		}
 	}
 }

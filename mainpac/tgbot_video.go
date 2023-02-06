@@ -20,34 +20,34 @@ type VideoAlbumsManager struct {
 func (s *Service) TgVideoComb(x tb.Context) (errReturn error) {
 	userID := x.Sender().ID
 
-	s.TG.VideoAlbumsManager.Mutex.Lock()
-	va, ok := s.TG.VideoAlbumsManager.Map[userID]
+	s.Bot.VideoAlbumsManager.Mutex.Lock()
+	va, ok := s.Bot.VideoAlbumsManager.Map[userID]
 	if !ok {
 		va = &VideoAlbum{}
-		s.TG.VideoAlbumsManager.Map[userID] = va
+		s.Bot.VideoAlbumsManager.Map[userID] = va
 	}
 	va.Videos = append(va.Videos, x.Message())
 
-	if s.TG.VideoAlbumsManager.MapLock[userID] {
-		s.TG.VideoAlbumsManager.Mutex.Unlock()
+	if s.Bot.VideoAlbumsManager.MapLock[userID] {
+		s.Bot.VideoAlbumsManager.Mutex.Unlock()
 		return
 	} else {
-		s.TG.VideoAlbumsManager.MapLock[userID] = true
+		s.Bot.VideoAlbumsManager.MapLock[userID] = true
 	}
-	s.TG.VideoAlbumsManager.Mutex.Unlock()
+	s.Bot.VideoAlbumsManager.Mutex.Unlock()
 
-	mes, err := x.Bot().Send(x.Sender(), "Подождите...")
+	mes, err := x.Bot().Send(x.Sender(), s.Bot.Text(x, "vid_wait"))
 	if err != nil {
 		return
 	}
 
 	time.Sleep(time.Second)
-	s.TG.VideoAlbumsManager.Mutex.Lock()
+	s.Bot.VideoAlbumsManager.Mutex.Lock()
 	defer func() {
 		x.Bot().Delete(mes)
-		delete(s.TG.VideoAlbumsManager.Map, userID)
-		delete(s.TG.VideoAlbumsManager.MapLock, userID)
-		s.TG.VideoAlbumsManager.Mutex.Unlock()
+		delete(s.Bot.VideoAlbumsManager.Map, userID)
+		delete(s.Bot.VideoAlbumsManager.MapLock, userID)
+		s.Bot.VideoAlbumsManager.Mutex.Unlock()
 	}()
 
 	sort.Slice(va.Videos, func(i, j int) bool { return va.Videos[i].ID < va.Videos[j].ID })
@@ -56,7 +56,7 @@ func (s *Service) TgVideoComb(x tb.Context) (errReturn error) {
 		album = append(album, videoMes.Video)
 	}
 	if len(album) < 2 {
-		x.Send("Видео только одно.")
+		x.Send(s.Bot.Text(x, "vid_len1"))
 		return
 	}
 	x.SendAlbum(album)

@@ -4,7 +4,7 @@ import (
 	"Laurene/go-log"
 	"Laurene/util"
 	"fmt"
-	"github.com/pkg/errors"
+	"github.com/rotisserie/eris"
 	tb "gopkg.in/telebot.v3"
 	"os"
 	"strconv"
@@ -18,31 +18,13 @@ Func -       логика работы
 Но они обязательны только все вместе
 */
 
-func (s *Service) TgStartCMD(x tb.Context) (errReturn error) {
-	text := "" +
-		"Приветствую, бот имеет следующие возможности:" +
-		"\n" +
-		"\n<b>Текст:</b>  (доступно в инлайн режиме)" +
-		"\n• Написание текста в обратном порядке" +
-		"\n• Текст в верхнем регистре" +
-		"\n• Текст в случайном регистре" +
-		"\n• Шифр Атбаш" +
-		"\n• Текст в эмоджи по первым буквам (алфавит - /emoji)" +
-		"\n" +
-		"\n<b>Разное:</b>" +
-		"\n• Склейка, сжатие фото" +
-		"\n• Объединение видео в один альбом"
-
-	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true}, tb.ModeHTML)
+func (s *Service) TgStart(x tb.Context) (errReturn error) {
+	x.Send(s.Bot.Text(x, "start"), &tb.ReplyMarkup{RemoveKeyboard: true}, tb.ModeHTML)
 	return
 }
 
 func (s *Service) TgStartYAB(x tb.Context) (errReturn error) {
-	text := "" +
-		"• Статистика уведомлений @YetAnotherBot\n  (инструкция тут /YABNotification)" +
-		"\n• Счёт дат в сообщении информации о пользователе из @YetAnotherBot."
-
-	x.Send(text, &tb.ReplyMarkup{RemoveKeyboard: true}, tb.ModeHTML)
+	x.Send(s.Bot.Text(x, "start_yab"), &tb.ReplyMarkup{RemoveKeyboard: true}, tb.ModeHTML)
 	return
 }
 
@@ -52,19 +34,10 @@ func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 		s.TgInfoUserYAB(x)
 		return
 	default:
-		text := "" +
-			"Что сделать с текстом?" +
-			"\n" +
-			"\n1. Обратный порядок" +
-			"\n2. В верхнем регистре" +
-			"\n3. В случайном регистре" +
-			"\n4. Шифр Атбаш" +
-			"\n5. В эмоджи по первым буквам"
-
-		x.Send(text, &tb.SendOptions{ReplyTo: x.Message()}, s.TG.menu.textBtns)
+		x.Send(s.Bot.Text(x, "ontext"), &tb.SendOptions{ReplyTo: x.Message()}, s.Bot.Markup(x, "text"))
 	}
 
-	switch s.TG.CallbackQuery[x.Chat().ID] {
+	switch s.Bot.CallbackQuery[x.Chat().ID] {
 	case "": //Нет в CallbackQuery - игнор
 	case "test":
 
@@ -73,18 +46,7 @@ func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 }
 
 func (s *Service) TgYABNotification(x tb.Context) (errReturn error) {
-	text := "" +
-		"В статистике получите количество ответов/обнимашек/шлепков/сообщений всего, топ 10 по каждой категории из списка чатлан. " +
-		"\n\nСтоить учитывать что статистика включает в себя именно уведомления, а не реальные действия в чате. " +
-		"Всё зависит от выставленных настроек времени активности. Но уведомления о шлепках и обнимашках работают всегда." +
-		"\nДанные не собираются :)" +
-		"\n\nПонадобиться пк версия телеграма." +
-		"\n1. Переходим в @YetAnotherNotificationBot" +
-		"\n2. 3 точки -> \"Экспорт истории чата\"" +
-		"\n3. Формат \"Машиночитаемый JSON\", даты произвольные, но не раньше 11 февраля 2019" +
-		"\n4. После экспорта кинуть полученный файл \"result.json\" сюда."
-
-	x.Send(text)
+	x.Send(s.Bot.Text(x, "yab"))
 	return
 }
 
@@ -103,7 +65,7 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 
 	// Текст в обратном порядке
 	text = textReverse(q.Text)
-	ar := &tb.ArticleResult{Title: "Текст в обратном порядке", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar := &tb.ArticleResult{Title: s.Bot.Text(x, "ti_reverse"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	res = append(res, ar)
 
@@ -111,28 +73,28 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 	text = s.Other.AtbashAlphabet.Replace(q.Text)
 	key := util.CreateKey(8)
 	s.Other.AtbashCache.Add(key, q.Text)
-	ar = &tb.ArticleResult{Title: "Кодировать шифром Атбаш", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_atbash"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
-	rm := *s.TG.menu.atbashBtns2
+	rm := *s.Bot.Markup(x, "atbash")
 	rm.InlineKeyboard[0][0].Data = key
 	ar.ReplyMarkup = &rm
 	res = append(res, ar)
 
 	// Текст в переводе на эмоджи
 	text = textEmoji(q.Text)
-	ar = &tb.ArticleResult{Title: "Эмоджи по первым буквам", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_emoji"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	res = append(res, ar)
 
 	// Текст в верхнем регистре
 	text = strings.ToUpper(q.Text)
-	ar = &tb.ArticleResult{Title: "Текст в верхнем регистре", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_upper"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	res = append(res, ar)
 
 	// Текст в случайном регистре
 	text = textRandom(q.Text, s.Rand)
-	ar = &tb.ArticleResult{Title: "Текст в случайном регистре", Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_random"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	res = append(res, ar)
 
@@ -153,34 +115,26 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 // Ниже только админское
 
 func (s *Service) TgTest(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
-	rm := &tb.ReplyMarkup{}
-	btn := *s.TG.Buttons["test"]
-	rm.Inline([]tb.Btn{btn})
-
-	x.Send("Test", rm, tb.ModeHTML, tb.NoPreview)
+	x.Send(s.Bot.Text(x, "test"), s.Bot.Markup(x, "test"), tb.ModeHTML, tb.NoPreview)
 	return
 }
 
 func (s *Service) TgTestBtn(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
-	rm := &tb.ReplyMarkup{}
-	btn := *s.TG.Buttons["test"]
-	rm.Inline([]tb.Btn{btn})
-
-	x.Send("Test", &tb.SendOptions{ReplyTo: x.Message()}, rm, tb.ModeHTML, tb.NoPreview)
+	x.Send(s.Bot.Text(x, "test"), &tb.SendOptions{ReplyTo: x.Message()}, s.Bot.Markup(x, "test"), tb.ModeHTML, tb.NoPreview)
 	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "test"})
 	return
 }
 
 func (s *Service) TgAdm(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
@@ -197,67 +151,83 @@ func (s *Service) TgAdm(x tb.Context) (errReturn error) {
 	return
 }
 
-func (s *Service) TgStatusCMD(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+func (s *Service) TgStatus(x tb.Context) (errReturn error) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
-	text, rm := s.TgStatusFunc()
-	x.Send(text, rm)
+	text, rm := s.TgStatusFunc(x)
+	mes, err := s.Bot.Send(x.Sender(), text, rm)
+	if err == nil && mes != nil {
+		s.Bot.Pin(mes)
+	}
 	return
 }
 
 func (s *Service) TgStatusUpdate(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
-	text, rm := s.TgStatusFunc()
-	s.TG.Bot.Edit(x.Message(), text, rm)
+	text, rm := s.TgStatusFunc(x)
+	_, err := s.Bot.Edit(x.Message(), text, rm, tb.ModeHTML)
+	if err != nil {
+		if err == tb.ErrSameMessageContent {
+			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Обновлено"})
+			return
+		}
+
+		s.Bot.Delete(x.Message())
+		mes, err := s.Bot.Send(x.Sender(), text, rm, tb.ModeHTML)
+		if err == nil && mes != nil {
+			s.Bot.Pin(mes)
+		}
+	}
+
 	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "Обновлено"})
 	return
 }
 
-func (s *Service) TgStatusFunc() (string, *tb.ReplyMarkup) {
-	text := fmt.Sprintf("Uptime: %s\nAlbums manager length: %v",
-		s.TG.uptimeString(s.TG.Uptime), s.TG.AlbumsManager.Len(),
+func (s *Service) TgStatusFunc(x tb.Context) (string, *tb.ReplyMarkup) {
+	text := fmt.Sprintf(""+
+		"Запущен: %s"+
+		"\nUptime: %s"+
+		"\n"+
+		"\nAlbums manager: %v",
+		s.Bot.Uptime.In(s.Loc).Format("2006.01.02 15:04:05 MST"), s.Bot.uptimeString(s.Bot.Uptime),
+		s.Bot.AlbumsManager.Len(),
 	)
 
-	rm := &tb.ReplyMarkup{}
-	rm.Inline([]tb.Btn{*s.TG.Buttons["status_update"]})
+	rm := s.Bot.Markup(x, "status")
 
 	return text, rm
 }
 
-func (s *Service) TgLogsCMD(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+func (s *Service) TgLogs(x tb.Context) (errReturn error) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
 	text := "1. Получить файл логов\n2. Очистить файл логов"
-	rm := &tb.ReplyMarkup{}
-	rm.Inline(
-		[]tb.Btn{*s.TG.Buttons["get_logs"], *s.TG.Buttons["clear_logs"]},
-	)
-	x.Send(text, rm, tb.ModeHTML)
+	x.Send(text, s.Bot.Markup(x, "logs"), tb.ModeHTML)
 	return
 }
 
 func (s *Service) TgGetLogsBtn(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
 	err := x.Send(&tb.Document{File: tb.FromDisk("files/logrus.log"), FileName: "logrus.log"})
 	if err != nil {
-		x.Send(errors.Wrap(err, "Ошибка отправки файла.").Error())
+		s.Bot.Send(x.Sender(), eris.Wrap(err, "Ошибка отправки файла.").Error())
 	}
 	x.Respond()
 	return
 }
 
 func (s *Service) TgClearLogsBtn(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
@@ -269,68 +239,68 @@ func (s *Service) TgClearLogsBtn(x tb.Context) (errReturn error) {
 }
 
 func (s *Service) TgDeleteBtn(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 	x.Respond()
-	s.TG.Bot.Delete(x.Message())
+	s.Bot.Delete(x.Message())
 	x.Delete()
 	return
 }
 
 func (s *Service) TgCancelReplyMarkup(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
-	delete(s.TG.CallbackQuery, x.Chat().ID)
+	delete(s.Bot.CallbackQuery, x.Chat().ID)
 	x.Send("Отменено.", &tb.ReplyMarkup{RemoveKeyboard: true})
 	return
 }
 
-func (s *Service) TgSetCmds(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+func (s *Service) TgSetCommands(x tb.Context) (errReturn error) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
-	x.Bot().SetCommands([]tb.Command{
-		tb.Command{"help", "Список возможностей"},
-	})
+	err := x.Bot().SetCommands(s.Bot.Layout.Commands())
+	if err != nil {
+		x.Send(eris.Wrap(err, "x.Bot().SetCommands()").Error())
+		return
+	}
 
-	x.Send("Сделано")
+	x.Send("Готово.")
 	return
 }
 
 /*
 
+func (s *Service) TgSome(x tb.Context) (errReturn error) {
+	return
+}
+
 func (s *Service) TgBtn(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Message().Chat.ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
 	//text, rm := s.TgFunc()
 	//x.Send(text, rm, tb.ModeHTML)
-	//s.TG.Bot.Edit(x.Message(), text, rm)
+	//s.Bot.Edit(x.Message(), text, rm)
 	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: ""})
 }
 func (s *Service) TgCMD(x tb.Context) (errReturn error) {
-	if !s.TG.isAdmin(x.Sender(), x.Chat().ID) {
+	if s.Bot.isNotAdmin(x) {
 		return
 	}
 
 	text, rm := s.TgInfoFilmFunc(m, 0)
-	rm := &tb.ReplyMarkup{}
-	rm.Inline(
-		[]tb.Btn{*s.TG.Buttons["status_update"]},
-	)
+	rm := s.Bot.Markup(x, "test")
 	x.Send(text, rm, tb.ModeHTML)
 }
 
 func (s *Service) TgFunc() (string, *tb.ReplyMarkup) {
 	text := ""
-	rm := &tb.ReplyMarkup{}
-	rm.Inline(
-		[]tb.Btn{*s.TG.Buttons["status_update"]},
-	)
+	rm := s.Bot.Markup(x, "test")
 }
 
 */
