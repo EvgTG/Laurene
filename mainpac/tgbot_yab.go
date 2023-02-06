@@ -112,9 +112,15 @@ func (s *Service) TgStatYABNotif(x tb.Context) (errReturn error) {
 		return
 	}
 
+	mes, err := s.Bot.Send(x.Sender(), "Обработка...")
+	if err != nil {
+		return
+	}
+	defer s.Bot.Delete(mes)
+
 	path := "files/temp/" + util.CreateKey(10) + ".json"
 	defer os.Remove(path)
-	err := x.Bot().Download(doc.MediaFile(), path)
+	err = s.Bot.Download(doc.MediaFile(), path)
 	if err != nil {
 		x.Send("Ошибка, напишите автору.")
 		return
@@ -151,7 +157,6 @@ func (s *Service) TgStatYABNotif(x tb.Context) (errReturn error) {
 		file.Seek(0, 0)
 
 		ch := ue.UnmarshalChan(file, 0)
-		defer close(ch)
 		for msg := range ch {
 			if msg == nil || msg.FromID != "user163626570" {
 				continue
@@ -180,12 +185,14 @@ func (s *Service) TgStatYABNotif(x tb.Context) (errReturn error) {
 	x.Send(text)
 
 	for _, key := range keys {
+		time.Sleep(time.Millisecond * 500)
 		text = "Топ " + key + "\n\n"
 		for i, u := range stat.TopFinal[key] {
 			text += fmt.Sprintf("%v. %v %v %v\n", i+1, u.number, u.id, u.nicks)
 		}
 		x.Send(text, &tb.SendOptions{DisableNotification: true})
 	}
+
 	return
 }
 

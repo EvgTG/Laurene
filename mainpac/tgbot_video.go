@@ -36,7 +36,7 @@ func (s *Service) TgVideoComb(x tb.Context) (errReturn error) {
 	}
 	s.Bot.VideoAlbumsManager.Mutex.Unlock()
 
-	mes, err := x.Bot().Send(x.Sender(), s.Bot.Text(x, "vid_wait"))
+	mes, err := s.Bot.Send(x.Sender(), s.Bot.Text(x, "vid_wait"))
 	if err != nil {
 		return
 	}
@@ -44,7 +44,7 @@ func (s *Service) TgVideoComb(x tb.Context) (errReturn error) {
 	time.Sleep(time.Second)
 	s.Bot.VideoAlbumsManager.Mutex.Lock()
 	defer func() {
-		x.Bot().Delete(mes)
+		s.Bot.Delete(mes)
 		delete(s.Bot.VideoAlbumsManager.Map, userID)
 		delete(s.Bot.VideoAlbumsManager.MapLock, userID)
 		s.Bot.VideoAlbumsManager.Mutex.Unlock()

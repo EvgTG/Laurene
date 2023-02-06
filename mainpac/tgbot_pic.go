@@ -38,7 +38,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 	if x.Message() == nil || x.Message().ReplyTo == nil {
 		return
 	}
-	defer x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	defer s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
 
 	albumID := x.Message().ReplyTo.AlbumID
 	if albumID == "" {
@@ -68,7 +68,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		photo := mes.Photo
 		path := dir + photo.FileID + ".jpg"
 		pathes = append(pathes, path)
-		err := x.Bot().Download(photo.MediaFile(), path)
+		err := s.Bot.Download(photo.MediaFile(), path)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgAlbumToPic Bot.Download"))
 			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
@@ -238,14 +238,14 @@ func (s *Service) TgFilePicToPic(x tb.Context) (errReturn error) {
 
 	outPath := "files/temp/" + util.CreateKey(12) + ".jpg"
 	defer os.Remove(outPath)
-	err := x.Bot().Download(x.Message().Document.MediaFile(), outPath)
+	err := s.Bot.Download(x.Message().Document.MediaFile(), outPath)
 	if err != nil {
 		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err")})
 		return
 	}
 
 	x.Send(&tb.Photo{File: tb.FromDisk(outPath), Caption: x.Message().Caption})
-	x.Bot().EditReplyMarkup(x.Message(), nil)
+	s.Bot.EditReplyMarkup(x.Message(), nil)
 	x.Respond()
 	return
 }
@@ -254,7 +254,7 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 	if x.Message() == nil || x.Message().ReplyTo == nil {
 		return
 	}
-	defer x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	defer s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
 
 	var quality int = 10
 	switch x.Callback().Data {
@@ -297,7 +297,7 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 		newpath := dir + util.CreateKey(12) + ".jpg"
 		pathes = append(pathes, path)
 		newpathes = append(newpathes, newpath)
-		err := x.Bot().Download(photo.MediaFile(), path)
+		err := s.Bot.Download(photo.MediaFile(), path)
 		if err != nil {
 			log.Error(errors.Wrap(err, "TgCompress Bot.Download"))
 			x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
@@ -363,19 +363,19 @@ func (s *Service) TgPicGif(x tb.Context) (errReturn error) {
 		return
 	}
 
-	mes, err := x.Bot().Send(x.Sender(), "Обработка...")
+	mes, err := s.Bot.Send(x.Sender(), "Обработка...")
 	if err != nil {
 		return
 	}
-	defer x.Bot().Delete(mes)
-	defer x.Bot().EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	defer s.Bot.Delete(mes)
+	defer s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
 
 	dir := "files/temp/" + util.CreateKey(5) + "/"
 	os.Mkdir(dir, fs.ModePerm)
 	defer os.RemoveAll(dir)
 	pathPic := dir + util.CreateKey(5) + ".jpg"
 
-	err = x.Bot().Download(x.Message().ReplyTo.Photo.MediaFile(), pathPic)
+	err = s.Bot.Download(x.Message().ReplyTo.Photo.MediaFile(), pathPic)
 	if err != nil {
 		log.Error(errors.Wrap(err, "TgPicGif Bot.Download"))
 		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})

@@ -36,27 +36,27 @@ buttons:
   album_compress1:
     unique: album_compress1
     callback_data: cp1
-    text: 2️⃣
+    text: 2️⃣🟢
   album_compress2:
     unique: album_compress2
     callback_data: cp2
-    text: 2️⃣
+    text: 2️⃣🟡
   album_compress3:
     unique: album_compress3
     callback_data: cp3
-    text: 2️⃣
+    text: 2️⃣🔴
   pic_compress1:
     unique: pic_compress1
     callback_data: cp1
-    text: 1️⃣
+    text: 1️⃣🟢
   pic_compress2:
     unique: pic_compress2
     callback_data: cp2
-    text: 1️⃣
+    text: 1️⃣🟡
   pic_compress3:
     unique: pic_compress3
     callback_data: cp3
-    text: 1️⃣
+    text: 1️⃣🔴
   pic_gif:
     unique: pic_gif
     callback_data: pic_gif

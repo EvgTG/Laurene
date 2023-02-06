@@ -262,9 +262,9 @@ func (s *Service) TgSetCommands(x tb.Context) (errReturn error) {
 		return
 	}
 
-	err := x.Bot().SetCommands(s.Bot.Layout.Commands())
+	err := s.Bot.SetCommands(s.Bot.Layout.Commands())
 	if err != nil {
-		x.Send(eris.Wrap(err, "x.Bot().SetCommands()").Error())
+		x.Send(eris.Wrap(err, "s.Bot.SetCommands()").Error())
 		return
 	}
 
