@@ -2,7 +2,7 @@
 Помощник с различными возможностями (текст, фото, всякое).
 ### Docker
 ```
-docker build -t laurenebot .  
+docker build --platform linux/amd64 -t laurenebot:latest -t laurenebot:1.x.x .
 docker run -d -v /path/files/:/app/files/ --net=host --name lrn laurenebot
 ```
 

@@ -42,14 +42,6 @@ type Bot struct {
 
 	AlbumsManager      *util.AlbumsManager
 	VideoAlbumsManager *VideoAlbumsManager
-
-	//menu struct {
-	//	picAlbumsBtns *tb.ReplyMarkup
-	//	picBtns       *tb.ReplyMarkup
-	//	textBtns      *tb.ReplyMarkup
-	//	atbashBtns    *tb.ReplyMarkup
-	//	atbashBtns2   *tb.InlineKeyboardMarkup
-	//}
 }
 
 type Other struct {
