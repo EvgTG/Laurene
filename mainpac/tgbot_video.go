@@ -20,6 +20,7 @@ type VideoAlbumsManager struct {
 func (s *Service) TgVideoComb(x tb.Context) (errReturn error) {
 	userID := x.Sender().ID
 
+	// Все сообщения в список, остаётся один поток
 	s.Bot.VideoAlbumsManager.Mutex.Lock()
 	va, ok := s.Bot.VideoAlbumsManager.Map[userID]
 	if !ok {
@@ -42,9 +43,9 @@ func (s *Service) TgVideoComb(x tb.Context) (errReturn error) {
 	}
 
 	time.Sleep(time.Second)
-	s.Bot.VideoAlbumsManager.Mutex.Lock()
 	defer func() {
 		s.Bot.Delete(mes)
+		s.Bot.VideoAlbumsManager.Mutex.Lock()
 		delete(s.Bot.VideoAlbumsManager.Map, userID)
 		delete(s.Bot.VideoAlbumsManager.MapLock, userID)
 		s.Bot.VideoAlbumsManager.Mutex.Unlock()

@@ -95,6 +95,8 @@ markups:
     remove_keyboard: true
   test:
     - [ test ]
+  cancel:
+    - [ cancel ]
   logs:
     - [ get_logs, clear_logs ]
   status:

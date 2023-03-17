@@ -37,11 +37,16 @@ func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 		x.Send(s.Bot.Text(x, "ontext"), &tb.SendOptions{ReplyTo: x.Message()}, s.Bot.Markup(x, "text"))
 	}
 
-	switch s.Bot.CallbackQuery[x.Chat().ID] {
+	s.Bot.CallbackQueryMutex.Lock()
+	cq := s.Bot.CallbackQuery[x.Chat().ID]
+	s.Bot.CallbackQueryMutex.Unlock()
+
+	// Не запускать функции отдельной горутиной - теряется контекст
+	switch cq {
 	case "": //Нет в CallbackQuery - игнор
 	case "test":
-
 	}
+
 	return
 }
 
@@ -252,7 +257,11 @@ func (s *Service) TgCancelReplyMarkup(x tb.Context) (errReturn error) {
 	if s.Bot.isNotAdmin(x) {
 		return
 	}
+
+	s.Bot.CallbackQueryMutex.Lock()
+	defer s.Bot.CallbackQueryMutex.Unlock()
 	delete(s.Bot.CallbackQuery, x.Chat().ID)
+
 	x.Send("Отменено.", &tb.ReplyMarkup{RemoveKeyboard: true})
 	return
 }

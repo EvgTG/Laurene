@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -37,8 +38,8 @@ type Bot struct {
 	Uptime   time.Time
 	Rand     *rand.Rand
 
-	Buttons       map[string]*tb.Btn
-	CallbackQuery map[int64]string // Контекстный ввод
+	CallbackQuery      map[int64]string // Контекстный ввод
+	CallbackQueryMutex sync.Mutex
 
 	AlbumsManager      *util.AlbumsManager
 	VideoAlbumsManager *VideoAlbumsManager
