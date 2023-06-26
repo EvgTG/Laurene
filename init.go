@@ -2,10 +2,11 @@ package main
 
 import (
 	"Laurene/go-log"
-	"Laurene/mainpac"
+	"Laurene/mainpack"
 	"Laurene/model"
 	"Laurene/mongodb"
 	"Laurene/util"
+	"context"
 	"fmt"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/rotisserie/eris"
@@ -18,7 +19,7 @@ import (
 	"time"
 )
 
-func New() (app *fx.App) {
+func NewApp() (app *fx.App) {
 	app = fx.New(
 		fx.Provide(
 			NewDB,
@@ -51,7 +52,7 @@ func NewDB() *model.Model {
 	return model.New(mongodb.NewDB(CFG.NameDB, CFG.MongoUrl))
 }
 
-func NewService( /*db *model.Model*/ ) *mainpac.Service {
+func NewService(lc fx.Lifecycle /*db *model.Model*/) *mainpack.Service {
 	lt, err := layout.New("bot.yml")
 	util.ErrCheckFatal(err, "layout.New()", "NewService", "init")
 	bot, err := tb.NewBot(tb.Settings{
@@ -61,8 +62,8 @@ func NewService( /*db *model.Model*/ ) *mainpac.Service {
 	util.ErrCheckFatal(err, "tb.NewBot()", "NewService", "init")
 	bot.Use(lt.Middleware("ru"))
 
-	service := &mainpac.Service{
-		Bot: &mainpac.Bot{
+	service := &mainpack.Service{
+		Bot: &mainpack.Bot{
 			Bot:           bot,
 			Layout:        lt,
 			Username:      bot.Me.Username,
@@ -73,8 +74,8 @@ func NewService( /*db *model.Model*/ ) *mainpac.Service {
 			Uptime:        time.Now(),
 			CallbackQuery: make(map[int64]string),
 			AlbumsManager: util.NewAlbumsManager(),
-			VideoAlbumsManager: &mainpac.VideoAlbumsManager{
-				Map:     make(map[int64]*mainpac.VideoAlbum),
+			VideoAlbumsManager: &mainpack.VideoAlbumsManager{
+				Map:     make(map[int64]*mainpack.VideoAlbum),
 				MapLock: make(map[int64]bool),
 				Mutex:   sync.Mutex{},
 			},
@@ -85,15 +86,22 @@ func NewService( /*db *model.Model*/ ) *mainpac.Service {
 		Rand: rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 
+	lc.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			service.Bot.Stop()
+			return nil
+		},
+	})
+
 	return service
 }
 
-func Start(s *mainpac.Service) {
+func Start(s *mainpack.Service) {
 	s.Start()
 }
 
 func PingServe() {
-	if !CFG.PingOn {
+	if !CFG.PingOn || CFG.PingPort == "" {
 		log.Info("PingServer off")
 		return
 	}

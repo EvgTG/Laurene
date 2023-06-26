@@ -1,19 +1,20 @@
-package mainpac
+package mainpack
 
 import (
 	"Laurene/util"
 	lru "github.com/hashicorp/golang-lru"
 	tb "gopkg.in/telebot.v3"
+	"gopkg.in/telebot.v3/middleware"
 	"io/fs"
 	"os"
 	"regexp"
 	"strings"
 )
 
-func (s *Service) InitTBot() {
+func (s *Service) InitBot() {
 	s.InitOther()
 
-	// Команды роуты
+	// Команды
 
 	s.Bot.Bot.Handle("/start", s.TgStart)
 	s.Bot.Bot.Handle("/help", s.TgStart)
@@ -28,20 +29,23 @@ func (s *Service) InitTBot() {
 
 	// Админские команды
 
-	s.Bot.Bot.Handle("/test", s.TgTest)
-	s.Bot.Bot.Handle("/adm", s.TgAdm)
-	s.Bot.Bot.Handle("/status", s.TgStatus)
-	s.Bot.Bot.Handle("/logs", s.TgLogs)
-	s.Bot.Bot.Handle("/setCmds", s.TgSetCommands)
+	adminOnly := s.Bot.Group()
+	adminOnly.Use(middleware.Whitelist(s.Bot.AdminList...))
 
-	// Кнопки роуты
+	adminOnly.Handle("/test", s.TgTest)
+	adminOnly.Handle("/adm", s.TgAdm)
+	adminOnly.Handle("/status", s.TgStatus)
+	adminOnly.Handle("/logs", s.TgLogs)
+	adminOnly.Handle("/setCmds", s.TgSetCommands)
 
-	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "test"), s.TgTestBtn)
+	// Кнопки
+
 	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "delete"), s.TgDeleteBtn)
-	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "cancel"), s.TgCancelReplyMarkup)
-	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "status_update"), s.TgStatusUpdate)
-	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "get_logs"), s.TgGetLogsBtn)
-	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "clear_logs"), s.TgClearLogsBtn)
+	adminOnly.Handle(s.Bot.Layout.ButtonLocale("", "test"), s.TgTestBtn)
+	adminOnly.Handle(s.Bot.Layout.ButtonLocale("", "cancel"), s.TgCancelReplyMarkup)
+	adminOnly.Handle(s.Bot.Layout.ButtonLocale("", "status_update"), s.TgStatusUpdate)
+	adminOnly.Handle(s.Bot.Layout.ButtonLocale("", "get_logs"), s.TgGetLogsBtn)
+	adminOnly.Handle(s.Bot.Layout.ButtonLocale("", "clear_logs"), s.TgClearLogsBtn)
 
 	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "album_to_pic_down"), s.TgAlbumToPic)
 	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "album_to_pic_right"), s.TgAlbumToPic)

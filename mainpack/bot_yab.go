@@ -1,4 +1,4 @@
-package mainpac
+package mainpack
 
 import (
 	ue "Laurene/unmarshal_export"

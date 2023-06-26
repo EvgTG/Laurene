@@ -7,6 +7,8 @@ buttons:
   test:
     unique: test
     text: Test
+  #   text: '{{ .Text }}'   s.Bot.MarkupLocale(lang, "test", TextStruct/*with Text*/)
+  #                         struct{ Text string }{Text: s.Bot.TextLocale(lang, "TextTest"/*in locales/*/)}
   delete:
     unique: delete
     text: 🗑Удалить

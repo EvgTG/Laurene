@@ -1,4 +1,4 @@
-package mainpac
+package mainpack
 
 import (
 	"Laurene/util"
@@ -15,7 +15,7 @@ func (s *Service) TgTextReverse(x tb.Context) (errReturn error) {
 	}
 
 	x.Send("<pre>"+textReverse(x.Message().ReplyTo.Text)+"</pre>", tb.ModeHTML)
-	s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }
 
@@ -34,8 +34,7 @@ func (s *Service) TgTextToUpper(x tb.Context) (errReturn error) {
 	}
 
 	x.Send("<pre>"+strings.ToUpper(x.Message().ReplyTo.Text)+"</pre>", tb.ModeHTML)
-	c := x.Callback()
-	s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, c.Data)})
+	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }
 
@@ -47,7 +46,7 @@ func (s *Service) TgTextRandom(x tb.Context) (errReturn error) {
 	}
 
 	x.Send("<pre>"+textRandom(x.Message().ReplyTo.Text, s.Rand)+"</pre>", tb.ModeHTML)
-	s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }
 
@@ -89,7 +88,7 @@ func (s *Service) TgTextEmoji(x tb.Context) (errReturn error) {
 	}
 
 	x.Send("<pre>"+textEmoji(x.Message().ReplyTo.Text)+"</pre>", tb.ModeHTML)
-	s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }
 
@@ -137,7 +136,7 @@ func (s *Service) TgTextAtbash(x tb.Context) (errReturn error) {
 	rm.InlineKeyboard[0][0].Data = key
 
 	x.Send("<pre>"+text+"</pre>", &rm, tb.ModeHTML)
-	s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }
 

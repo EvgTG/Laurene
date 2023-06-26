@@ -1,4 +1,4 @@
-package mainpac
+package mainpack
 
 import (
 	"Laurene/go-log"
@@ -120,29 +120,17 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 // Ниже только админское
 
 func (s *Service) TgTest(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	x.Send(s.Bot.Text(x, "test"), s.Bot.Markup(x, "test"), tb.ModeHTML, tb.NoPreview)
 	return
 }
 
 func (s *Service) TgTestBtn(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	x.Send(s.Bot.Text(x, "test"), &tb.SendOptions{ReplyTo: x.Message()}, s.Bot.Markup(x, "test"), tb.ModeHTML, tb.NoPreview)
 	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: "test"})
 	return
 }
 
 func (s *Service) TgAdm(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	text := fmt.Sprintf("" +
 		"<b>Пользователькие команды:</b>" +
 		"\n/start - приветствие" +
@@ -157,12 +145,8 @@ func (s *Service) TgAdm(x tb.Context) (errReturn error) {
 }
 
 func (s *Service) TgStatus(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	text, rm := s.TgStatusFunc(x)
-	mes, err := s.Bot.Send(x.Sender(), text, rm)
+	mes, err := s.Bot.Send(x.Sender(), text, rm, tb.ModeHTML)
 	if err == nil && mes != nil {
 		s.Bot.Pin(mes)
 	}
@@ -170,10 +154,6 @@ func (s *Service) TgStatus(x tb.Context) (errReturn error) {
 }
 
 func (s *Service) TgStatusUpdate(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	text, rm := s.TgStatusFunc(x)
 	_, err := s.Bot.Edit(x.Message(), text, rm, tb.ModeHTML)
 	if err != nil {
@@ -209,20 +189,12 @@ func (s *Service) TgStatusFunc(x tb.Context) (string, *tb.ReplyMarkup) {
 }
 
 func (s *Service) TgLogs(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	text := "1. Получить файл логов\n2. Очистить файл логов"
 	x.Send(text, s.Bot.Markup(x, "logs"), tb.ModeHTML)
 	return
 }
 
 func (s *Service) TgGetLogsBtn(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	err := x.Send(&tb.Document{File: tb.FromDisk("files/logrus.log"), FileName: "logrus.log"})
 	if err != nil {
 		s.Bot.Send(x.Sender(), eris.Wrap(err, "Ошибка отправки файла.").Error())
@@ -232,10 +204,6 @@ func (s *Service) TgGetLogsBtn(x tb.Context) (errReturn error) {
 }
 
 func (s *Service) TgClearLogsBtn(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	os.Truncate("files/logrus.log", 0)
 	log.Info("Очищено")
 
@@ -244,33 +212,25 @@ func (s *Service) TgClearLogsBtn(x tb.Context) (errReturn error) {
 }
 
 func (s *Service) TgDeleteBtn(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
 	x.Respond()
-	s.Bot.Delete(x.Message())
 	x.Delete()
 	return
 }
 
 func (s *Service) TgCancelReplyMarkup(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
-	s.Bot.CallbackQueryMutex.Lock()
-	defer s.Bot.CallbackQueryMutex.Unlock()
-	delete(s.Bot.CallbackQuery, x.Chat().ID)
+	s.DeleteCallbackQuery(x.Chat().ID)
 
 	x.Send("Отменено.", &tb.ReplyMarkup{RemoveKeyboard: true})
 	return
 }
 
-func (s *Service) TgSetCommands(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
+func (s *Service) DeleteCallbackQuery(chatID int64) {
+	s.Bot.CallbackQueryMutex.Lock()
+	delete(s.Bot.CallbackQuery, chatID)
+	s.Bot.CallbackQueryMutex.Unlock()
+}
 
+func (s *Service) TgSetCommands(x tb.Context) (errReturn error) {
 	err := s.Bot.SetCommands(s.Bot.Layout.Commands())
 	if err != nil {
 		x.Send(eris.Wrap(err, "s.Bot.SetCommands()").Error())
@@ -288,20 +248,12 @@ func (s *Service) TgSome(x tb.Context) (errReturn error) {
 }
 
 func (s *Service) TgBtn(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	//text, rm := s.TgFunc()
 	//x.Send(text, rm, tb.ModeHTML)
 	//s.Bot.Edit(x.Message(), text, rm)
 	x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: ""})
 }
 func (s *Service) TgCMD(x tb.Context) (errReturn error) {
-	if s.Bot.isNotAdmin(x) {
-		return
-	}
-
 	text, rm := s.TgInfoFilmFunc(m, 0)
 	rm := s.Bot.Markup(x, "test")
 	x.Send(text, rm, tb.ModeHTML)

@@ -1,4 +1,4 @@
-package mainpac
+package mainpack
 
 import (
 	"Laurene/go-log"
@@ -59,11 +59,13 @@ type Other struct {
 
 func (s Service) Start() {
 	log.Info("tgbot init")
-	s.InitTBot()
+	s.InitBot()
+
 	log.Info("tgbot launch...")
 	fmt.Println("tgbot @" + s.Bot.Bot.Me.Username)
+
 	go s.GoCheckErrs()
-	s.Bot.Bot.Start()
+	go s.Bot.Start()
 }
 
 func (s Service) GoCheckErrs() {

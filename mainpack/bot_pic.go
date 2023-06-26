@@ -1,4 +1,4 @@
-package mainpac
+package mainpack
 
 import (
 	"Laurene/go-log"
@@ -38,7 +38,7 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 	if x.Message() == nil || x.Message().ReplyTo == nil {
 		return
 	}
-	defer s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	defer s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 
 	albumID := x.Message().ReplyTo.AlbumID
 	if albumID == "" {
@@ -254,7 +254,7 @@ func (s *Service) TgCompress(x tb.Context) (errReturn error) {
 	if x.Message() == nil || x.Message().ReplyTo == nil {
 		return
 	}
-	defer s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	defer s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 
 	var quality int = 10
 	switch x.Callback().Data {
@@ -368,7 +368,7 @@ func (s *Service) TgPicGif(x tb.Context) (errReturn error) {
 		return
 	}
 	defer s.Bot.Delete(mes)
-	defer s.Bot.EditReplyMarkup(x.Message(), &tb.ReplyMarkup{InlineKeyboard: delBtn(x.Message().ReplyMarkup.InlineKeyboard, x.Callback().Data)})
+	defer s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 
 	dir := "files/temp/" + util.CreateKey(5) + "/"
 	os.Mkdir(dir, fs.ModePerm)

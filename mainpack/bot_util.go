@@ -1,4 +1,4 @@
-package mainpac
+package mainpack
 
 import (
 	"Laurene/util"
@@ -35,18 +35,18 @@ func (Bot *Bot) uptimeString(timestamp time.Time) string {
 	return hoursStr + uptime.String()
 }
 
-func delBtn(rows [][]tb.InlineButton, copyData string) [][]tb.InlineButton {
-	for i, row := range rows {
+func delBtn(rm *tb.ReplyMarkup, copyData string) *tb.ReplyMarkup {
+	for i, row := range rm.InlineKeyboard {
 		for i2, button := range row {
 			ii := strings.Index(button.Data, "|")
 			if ii < 0 {
 				continue
 			}
 			if button.Data[ii+1:] == copyData {
-				rows[i] = append(rows[i][:i2], rows[i][i2+1:]...)
-				return rows
+				rm.InlineKeyboard[i] = append(rm.InlineKeyboard[i][:i2], rm.InlineKeyboard[i][i2+1:]...)
+				return rm
 			}
 		}
 	}
-	return rows
+	return rm
 }

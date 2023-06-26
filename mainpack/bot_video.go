@@ -1,4 +1,4 @@
-package mainpac
+package mainpack
 
 import (
 	tb "gopkg.in/telebot.v3"
