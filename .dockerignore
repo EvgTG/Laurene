@@ -3,5 +3,5 @@ vendor
 .idea
 files/
 .DS_Store
-.git
+.git/
 sh/
