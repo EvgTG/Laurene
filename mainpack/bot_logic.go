@@ -1,14 +1,16 @@
 package mainpack
 
 import (
-	"Laurene/go-log"
-	"Laurene/util"
 	"fmt"
-	"github.com/rotisserie/eris"
-	tb "gopkg.in/telebot.v3"
 	"os"
 	"strconv"
 	"strings"
+
+	"Laurene/go-log"
+	"Laurene/util"
+
+	"github.com/rotisserie/eris"
+	tb "gopkg.in/telebot.v3"
 )
 
 /*
@@ -43,7 +45,7 @@ func (s *Service) TgOnText(x tb.Context) (errReturn error) {
 
 	// Не запускать функции отдельной горутиной - теряется контекст
 	switch cq {
-	case "": //Нет в CallbackQuery - игнор
+	case "": // Нет в CallbackQuery - игнор
 	case "test":
 	}
 

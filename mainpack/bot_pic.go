@@ -1,13 +1,7 @@
 package mainpack
 
 import (
-	"Laurene/go-log"
-	"Laurene/util"
 	"bytes"
-	"github.com/nfnt/resize"
-	"github.com/pkg/errors"
-	"golang.org/x/image/draw"
-	tb "gopkg.in/telebot.v3"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -15,6 +9,14 @@ import (
 	"os"
 	"sort"
 	"time"
+
+	"Laurene/go-log"
+	"Laurene/util"
+
+	"github.com/nfnt/resize"
+	"github.com/pkg/errors"
+	"golang.org/x/image/draw"
+	tb "gopkg.in/telebot.v3"
 )
 
 func (s *Service) TgPic(x tb.Context) (errReturn error) {
