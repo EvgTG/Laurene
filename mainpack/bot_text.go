@@ -1,10 +1,12 @@
 package mainpack
 
 import (
-	"Laurene/util"
-	tb "gopkg.in/telebot.v3"
 	"math/rand"
 	"strings"
+
+	"Laurene/util"
+
+	tb "gopkg.in/telebot.v3"
 )
 
 func (s *Service) TgTextReverse(x tb.Context) (errReturn error) {
@@ -14,7 +16,7 @@ func (s *Service) TgTextReverse(x tb.Context) (errReturn error) {
 		return
 	}
 
-	x.Send("<pre>"+textReverse(x.Message().ReplyTo.Text)+"</pre>", tb.ModeHTML)
+	x.Send(textReverse(x.Message().ReplyTo.Text), tb.ModeHTML)
 	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }
@@ -33,7 +35,7 @@ func (s *Service) TgTextToUpper(x tb.Context) (errReturn error) {
 		return
 	}
 
-	x.Send("<pre>"+strings.ToUpper(x.Message().ReplyTo.Text)+"</pre>", tb.ModeHTML)
+	x.Send(strings.ToUpper(x.Message().ReplyTo.Text), tb.ModeHTML)
 	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }
@@ -45,7 +47,7 @@ func (s *Service) TgTextRandom(x tb.Context) (errReturn error) {
 		return
 	}
 
-	x.Send("<pre>"+textRandom(x.Message().ReplyTo.Text, s.Rand)+"</pre>", tb.ModeHTML)
+	x.Send(textRandom(x.Message().ReplyTo.Text, s.Rand), tb.ModeHTML)
 	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }
@@ -87,7 +89,7 @@ func (s *Service) TgTextEmoji(x tb.Context) (errReturn error) {
 		return
 	}
 
-	x.Send("<pre>"+textEmoji(x.Message().ReplyTo.Text)+"</pre>", tb.ModeHTML)
+	x.Send(textEmoji(x.Message().ReplyTo.Text), tb.ModeHTML)
 	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }
@@ -135,7 +137,7 @@ func (s *Service) TgTextAtbash(x tb.Context) (errReturn error) {
 	rm := *s.Bot.Markup(x, "atbash")
 	rm.InlineKeyboard[0][0].Data = key
 
-	x.Send("<pre>"+text+"</pre>", &rm, tb.ModeHTML)
+	x.Send(text, &rm, tb.ModeHTML)
 	s.Bot.EditReplyMarkup(x.Message(), delBtn(x.Message().ReplyMarkup, x.Callback().Data))
 	return
 }

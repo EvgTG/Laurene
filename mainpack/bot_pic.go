@@ -219,35 +219,18 @@ func (s *Service) TgAlbumToPic(x tb.Context) (errReturn error) {
 		return
 	}
 
-	err = x.Send(&tb.Document{File: tb.FromDisk(outPath), FileName: "pic.jpg", Caption: photosMes[0].Caption}, s.Bot.Markup(x, "picfile_to_pic"))
+	err = x.Send(&tb.Photo{File: tb.FromDisk(outPath), Width: rgba.Bounds().Max.X, Height: rgba.Bounds().Max.Y, Caption: x.Message().Caption})
 	if err != nil {
 		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
-	x.Respond()
-	return
-}
 
-func (s *Service) TgFilePicToPic(x tb.Context) (errReturn error) {
-	if x.Message() == nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err")})
-		return
-	}
-	if x.Message().Document == nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err")})
-		return
-	}
-
-	outPath := "files/temp/" + util.CreateKey(12) + ".jpg"
-	defer os.Remove(outPath)
-	err := s.Bot.Download(x.Message().Document.MediaFile(), outPath)
+	err = x.Send(&tb.Document{File: tb.FromDisk(outPath), FileName: "pic.jpg", Caption: photosMes[0].Caption})
 	if err != nil {
-		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err")})
+		x.Respond(&tb.CallbackResponse{CallbackID: x.Callback().ID, Text: s.Bot.Text(x, "pic_err"), ShowAlert: true})
 		return
 	}
 
-	x.Send(&tb.Photo{File: tb.FromDisk(outPath), Caption: x.Message().Caption})
-	s.Bot.EditReplyMarkup(x.Message(), nil)
 	x.Respond()
 	return
 }

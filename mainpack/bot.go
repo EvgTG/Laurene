@@ -1,14 +1,16 @@
 package mainpack
 
 import (
-	"Laurene/util"
-	lru "github.com/hashicorp/golang-lru"
-	tb "gopkg.in/telebot.v3"
-	"gopkg.in/telebot.v3/middleware"
 	"io/fs"
 	"os"
 	"regexp"
 	"strings"
+
+	"Laurene/util"
+
+	lru "github.com/hashicorp/golang-lru"
+	tb "gopkg.in/telebot.v3"
+	"gopkg.in/telebot.v3/middleware"
 )
 
 func (s *Service) InitBot() {
@@ -57,7 +59,6 @@ func (s *Service) InitBot() {
 	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "pic_compress2"), s.TgCompress)
 	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "pic_compress3"), s.TgCompress)
 	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "pic_gif"), s.TgPicGif)
-	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "picfile_to_pic"), s.TgFilePicToPic)
 	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "text_reverse"), s.TgTextReverse)
 	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "text_toupper"), s.TgTextToUpper)
 	s.Bot.Handle(s.Bot.Layout.ButtonLocale("", "text_random"), s.TgTextRandom)

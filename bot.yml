@@ -63,9 +63,6 @@ buttons:
     unique: pic_gif
     callback_data: pic_gif
     text: 2️⃣▶️
-  picfile_to_pic:
-    unique: picfile_to_pic
-    text: 🖼 Отправить картинкой
   text_reverse:
     unique: text_reverse
     callback_data: 1
@@ -108,8 +105,6 @@ markups:
     - [ album_compress1, album_compress2, album_compress3 ]
   pic:
     - [ pic_compress1, pic_compress2, pic_compress3, pic_gif ]
-  picfile_to_pic:
-    - [ picfile_to_pic ]
   text:
     - [ text_reverse, text_toupper, text_random, text_atbash, text_emoji ]
   atbash:

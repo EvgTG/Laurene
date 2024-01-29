@@ -72,7 +72,7 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 
 	// Текст в обратном порядке
 	text = textReverse(q.Text)
-	ar := &tb.ArticleResult{Title: s.Bot.Text(x, "ti_reverse"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar := &tb.ArticleResult{Title: s.Bot.Text(x, "ti_reverse"), Text: text, Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	res = append(res, ar)
 
@@ -80,7 +80,7 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 	text = s.Other.AtbashAlphabet.Replace(q.Text)
 	key := util.CreateKey(8)
 	s.Other.AtbashCache.Add(key, q.Text)
-	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_atbash"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_atbash"), Text: text, Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	rm := *s.Bot.Markup(x, "atbash")
 	rm.InlineKeyboard[0][0].Data = key
@@ -89,19 +89,19 @@ func (s *Service) TgOnTextInline(x tb.Context) (errReturn error) {
 
 	// Текст в переводе на эмоджи
 	text = textEmoji(q.Text)
-	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_emoji"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_emoji"), Text: text, Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	res = append(res, ar)
 
 	// Текст в верхнем регистре
 	text = strings.ToUpper(q.Text)
-	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_upper"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_upper"), Text: text, Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	res = append(res, ar)
 
 	// Текст в случайном регистре
 	text = textRandom(q.Text, s.Rand)
-	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_random"), Text: "<pre>" + text + "</pre>", Description: util.TextCut(text, 50)}
+	ar = &tb.ArticleResult{Title: s.Bot.Text(x, "ti_random"), Text: text, Description: util.TextCut(text, 50)}
 	ar.ParseMode = tb.ModeHTML
 	res = append(res, ar)
 
